@@ -1,0 +1,35 @@
+<div class="users-container">
+  <div class="header">
+    <h1>Gestion des Utilisateurs</h1>
+    <p>Visualisez et modifiez les rôles des utilisateurs de la plateforme.</p>
+  </div>
+
+  <div *ngIf="loading" class="loader">Chargement...</div>
+
+  <div *ngIf="!loading" class="table-responsive">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Rôle actuel</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
+          </td>
+          <td>
+            <select [ngModel]="user.role" (ngModelChange)="changeRole(user, $event)" class="role-select">
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

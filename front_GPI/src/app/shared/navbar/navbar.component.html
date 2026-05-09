@@ -1,0 +1,36 @@
+<nav class="navbar" *ngIf="isLoggedIn">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <span class="logo">L'ISCAE</span>
+      <span class="role-badge" [ngClass]="userRole">{{ userRole | uppercase }}</span>
+    </div>
+
+    <ul class="navbar-menu">
+      <!-- Liens pour l'Étudiant -->
+      <ng-container *ngIf="userRole === 'etudiant'">
+        <li><a routerLink="/student" routerLinkActive="active">Mon Tableau de bord</a></li>
+        <li><a routerLink="/student/courses" routerLinkActive="active">Mes Cours</a></li>
+        <li><a routerLink="/student/grades" routerLinkActive="active">Mes Notes</a></li>
+      </ng-container>
+
+      <!-- Liens pour l'Enseignant -->
+      <ng-container *ngIf="userRole === 'enseignant'">
+        <li><a routerLink="/teacher" routerLinkActive="active">Espace Enseignant</a></li>
+        <li><a routerLink="/teacher/classes" routerLinkActive="active">Mes Classes</a></li>
+        <li><a routerLink="/teacher/grading" routerLinkActive="active">Saisir les notes</a></li>
+      </ng-container>
+
+      <!-- Liens pour l'Administration -->
+      <ng-container *ngIf="userRole === 'admin'">
+        <li><a routerLink="/admin" routerLinkActive="active">Administration</a></li>
+        <li><a routerLink="/admin/users" routerLinkActive="active">Gérer les utilisateurs</a></li>
+        <li><a routerLink="/admin/settings" routerLinkActive="active">Paramètres globaux</a></li>
+      </ng-container>
+    </ul>
+
+    <div class="navbar-user">
+      <span class="user-name">Bonjour, {{ userName }}</span>
+      <button class="btn-logout" (click)="logout()">Se déconnecter</button>
+    </div>
+  </div>
+</nav>

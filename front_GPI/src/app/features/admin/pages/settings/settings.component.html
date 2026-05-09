@@ -1,0 +1,17 @@
+<div class="settings-container">
+  <h1>Paramètres Globaux</h1>
+  <p>Configurez les options générales de la plateforme.</p>
+
+  <div class="settings-card">
+    <div class="setting-item" *ngFor="let s of settings">
+      <div class="setting-info">
+        <label>{{ s.name }}</label>
+      </div>
+      <div class="setting-control">
+        <input *ngIf="s.type === 'text'" type="text" [(ngModel)]="s.value" class="input-text">
+        <input *ngIf="s.type === 'boolean'" type="checkbox" [(ngModel)]="s.value">
+      </div>
+    </div>
+    <button class="btn-save" (click)="saveSettings()">Enregistrer les modifications</button>
+  </div>
+</div>
