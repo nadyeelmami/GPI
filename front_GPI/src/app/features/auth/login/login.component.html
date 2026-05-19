@@ -1,0 +1,95 @@
+<div class="page-bg">
+  <div class="main-card">
+    
+    <div class="blue-graphic-side">
+      <div class="welcome-text-box">
+        <h1>BIENVENUE</h1>
+        <h3>PLATEFORME ISCAE</h3>
+        <p>
+          Accédez à votre espace personnel pour consulter vos notes, gérer les résultats
+          et suivre les informations académiques en toute sécurité.
+        </p>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="form-container-box">
+        <h2>Connexion</h2>
+        <p class="subtitle">
+          Système de gestion des notes - ISCAE
+        </p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fa-regular fa-user input-icon"></i>
+              <input 
+                id="email" 
+                type="text" 
+                formControlName="email" 
+                placeholder="Matricule ou email"
+                [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+              >
+            </div>
+
+            <div class="error-msg" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <small *ngIf="loginForm.get('email')?.errors?.['required']">
+                L'identifiant est requis.
+              </small>
+              <small *ngIf="loginForm.get('email')?.errors?.['pattern']">
+                Format invalide.
+              </small>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fa-solid fa-lock input-icon"></i>
+              <input 
+                id="password" 
+                type="password" 
+                formControlName="password" 
+                placeholder="Mot de passe"
+                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              >
+            </div>
+
+            <div class="error-msg" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <small *ngIf="loginForm.get('password')?.errors?.['required']">
+                Le mot de passe est requis.
+              </small>
+            </div>
+          </div>
+
+          <div class="meta-options">
+            <label class="checkbox-label">
+              <input type="checkbox">
+              Se souvenir de moi
+            </label>
+
+            <a href="https://wa.me/22234714361" class="forgot-link">
+              Mot de passe oublié ?
+            </a>
+          </div>
+
+          <div class="error-alert" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button type="submit" [disabled]="loginForm.invalid || isLoading" class="btn-signin">
+            <span *ngIf="!isLoading">Se connecter</span>
+            <div *ngIf="isLoading" class="loader"></div>
+          </button>
+
+          <p class="footer-text">
+            Compte créé uniquement par 
+            <a href="#">l’administration</a>
+          </p>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>

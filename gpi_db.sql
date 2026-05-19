@@ -48,3 +48,10 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+insert into users (name, email, password, role) values 
+('ADMIN', 'admin@iscae.mr', '$2y$10$WIRuF4A/j6g1k0G2CJ2xjehoy1ivV8Rm4.Ux3nocPG0LcvQ26xlzW', 'admin'),
+('prof', 'prof@iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'enseignant'),
+('etudiant', 'I12345@etu.iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'etudiant');
+--I12345@etu.iscae.mr mot de passe =matriculeiscae
+--dupont@iscae.mr mot de passe =profiscae
+--admin@iscae.mr mot de passe =admin

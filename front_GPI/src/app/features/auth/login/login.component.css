@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+
+* {
+  box-sizing: border-box;
+}
+.page-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+ background: linear-gradient(135deg, #1560bd, #0d4fa9);
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
+}
+
+.main-card {
+  display: flex;
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  height: 560px;
+  background: #ffffff;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(to right, #093c84 45%, #ffffff 45%);
+}
+
+.blue-graphic-side {
+  width: 45%; 
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 60px;
+  padding-right: 20px;
+  z-index: 2;
+  background: transparent;
+}
+
+.welcome-text-box {
+  color: #ffffff;
+  max-width: 320px;
+}
+
+.welcome-text-box h1 {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin: 0 0 6px 0;
+}
+
+.welcome-text-box h3 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  opacity: 0.9;
+  margin: 0 0 22px 0;
+}
+
+.welcome-text-box p {
+  font-size: 11px;
+  line-height: 1.6;
+  opacity: 0.65;
+  margin: 0;
+}
+.form-side {
+  width: 55%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 60px;
+  background: transparent;
+  z-index: 2;
+}
+
+.form-container-box {
+  width: 100%;
+  max-width: 320px;
+}
+
+.form-container-box h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.form-container-box .subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  margin: 0 0 28px 0;
+}
+
+
+.input-group {
+  margin-bottom: 14px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 13px 16px 13px 44px;
+  background-color: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1f2937;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+  color: #9ca3af;
+}
+
+.input-wrapper input:focus {
+  background-color: #ffffff;
+  border-color: #0d3b75;
+}
+
+.meta-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin: 16px 0 24px 0;
+  color: #374151;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: #374151;
+  text-decoration: none;
+}
+
+.btn-signin {
+  width: 100%;
+  padding: 12px;
+  background: #092a54; 
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-signin:hover:not([disabled]) {
+  background: #092a54;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 26px;
+  margin-bottom: 0;
+}
+
+.footer-text a {
+  color: #093c84;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.input-wrapper input.is-invalid {
+  border: 1px solid #dc2626;
+  background-color: #fef2f2;
+}
+
+.error-msg small {
+  color: #dc2626;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+}
+
+.error-alert {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fee2e2;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.loader {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@media (max-width: 768px) {
+  .main-card { 
+    background-image: none; 
+    background-color: #ffffff;
+    max-width: 400px; 
+    height: auto; 
+  }
+  .blue-graphic-side { display: none; }
+  .form-side { width: 100%; padding: 40px; }
+}
