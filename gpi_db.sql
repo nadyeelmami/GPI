@@ -48,10 +48,69 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-insert into users (name, email, password, role) values 
+insert into users (name, email, password, role) values
 ('ADMIN', 'admin@iscae.mr', '$2y$10$WIRuF4A/j6g1k0G2CJ2xjehoy1ivV8Rm4.Ux3nocPG0LcvQ26xlzW', 'admin'),
 ('prof', 'prof@iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'enseignant'),
 ('etudiant', 'I12345@etu.iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'etudiant');
---I12345@etu.iscae.mr mot de passe =matriculeiscae
---dupont@iscae.mr mot de passe =profiscae
---admin@iscae.mr mot de passe =admin
+
+CREATE TABLE `classes` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `nom_classe` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Licence 1 Informatique"
+  `niveau` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "L1", "M2"
+  `annee_scolaire` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "2025-2026"
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `matieres` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `nom_matiere` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Algorithmique"
+  `coefficient` int(11) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE `affectations` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `user_id` bigint(20) UNSIGNED NOT NULL, -- L'ID du professeur (clé étrangère vers 'users')
+  `matiere_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la matière (clé étrangère vers 'matieres')
+  `classe_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la classe (clé étrangère vers 'classes')
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  
+  CONSTRAINT `fk_affectation_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_affectation_matiere` FOREIGN KEY (`matiere_id`) REFERENCES `matieres` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_affectation_classe` FOREIGN KEY (`classe_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
+  
+  UNIQUE KEY `unique_affectation` (`user_id`, `matiere_id`, `classe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `etudiant_classe` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de l'étudiant
+    `classe_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la classe
+    
+    CONSTRAINT `fk_etu_classe_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_etu_classe_classe` FOREIGN KEY (`classe_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
+    
+    UNIQUE KEY `unique_etu_classe` (`user_id`, `classe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `notes` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `etudiant_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers users (role etudiant)
+  `matiere_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers matieres
+  `prof_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers users (role enseignant) - pour garder une trace de qui a noté
+  `valeur_note` decimal(4,2) NOT NULL, -- Permet des notes comme 15.50
+  `statut_validation` boolean NOT NULL DEFAULT 0, -- 0 = saisie en cours (modifiable), 1 = validée (non modifiable)
+  `type_evaluation` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Examen', -- Ex: "Examen", "CC1", "TD"
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  
+  CONSTRAINT `fk_note_etudiant` FOREIGN KEY (`etudiant_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_note_matiere` FOREIGN KEY (`matiere_id`) REFERENCES `matieres` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_note_prof` FOREIGN KEY (`prof_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  
+  CHECK (`valeur_note` >= 0 AND `valeur_note` <= 20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

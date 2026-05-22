@@ -21,3 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/ping', function() {
     return response()->json(['message' => 'Liaison Angular-Laravel OK !']);
 });
+use App\Http\Controllers\ClasseController;
+
+Route::get('/classes', [ClasseController::class, 'index']);
+Route::post('/classes', [ClasseController::class, 'store']);
+Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);

@@ -1,1 +1,162 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand-section">
+        <h4 class="brand-logo">ISCAE ADMIN</h4>
+        <p class="brand-subtitle">Gestion des Notes</p>
+      </div>
+
+      <nav class="menu-section">
+        <a class="menu-link active" href="#">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Tableau de Bord</span>
+        </a>
+        <a class="menu-link" href="#">
+          <i class="fa-solid fa-users"></i>
+          <span>Utilisateurs</span>
+        </a>
+        <a class="menu-link" href="#">
+          <i class="fa-solid fa-book"></i>
+          <span>Matières</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User profile at the bottom of sidebar -->
+    <div class="user-profile-card">
+      <div class="avatar">AD</div>
+      <div class="user-info">
+        <span class="user-name">Directeur</span>
+        <span class="user-role">Administrateur</span>
+      </div>
+      <button onclick="localStorage.clear(); window.location.href = '/login';" class="logout-btn" title="Se déconnecter">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="header-container">
+      <div class="header-title">
+        <h2>Tableau de Bord</h2>
+        <p>Gérez les classes de l'ISCAE et supervisez les paramètres du système.</p>
+      </div>
+    </header>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-details">
+          <h4>{{ classes().length }}</h4>
+          <span>Classes Actives</span>
+        </div>
+        <div class="stat-icon-wrapper icon-blue">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-details">
+          <h4>18</h4>
+          <span>Enseignants</span>
+        </div>
+        <div class="stat-icon-wrapper icon-purple">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-details">
+          <h4>245</h4>
+          <span>Étudiants inscrits</span>
+        </div>
+        <div class="stat-icon-wrapper icon-green">
+          <i class="fa-solid fa-user-graduate"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard layout grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Adding Class Form Card -->
+      <div class="custom-card">
+        <div class="card-header-custom">
+          <h5>Ajouter une Classe</h5>
+        </div>
+        <div class="card-body-custom">
+          <div class="mb-4">
+            <label class="form-label-custom">Nom de la classe</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formClasse.nom_classe" 
+              class="form-control-custom"
+              placeholder="Ex: Licence 1 Informatique"
+            >
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label-custom">Niveau d'études</label>
+            <select [(ngModel)]="formClasse.niveau" class="form-control-custom">
+              <option value="L1">Licence 1 (L1)</option>
+              <option value="L2">Licence 2 (L2)</option>
+              <option value="L3">Licence 3 (L3)</option>
+              <option value="M1">Master 1 (M1)</option>
+              <option value="M2">Master 2 (M2)</option>
+            </select>
+          </div>
+
+          <button (click)="saveClasse()" class="btn-primary-custom mt-2">
+            <i class="fa-solid fa-circle-check me-2"></i> Enregistrer
+          </button>
+        </div>
+      </div>
+
+      <!-- Existing Classes List Card -->
+      <div class="custom-card">
+        <div class="card-header-custom">
+          <h5>Classes Existantes</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Nom de la classe</th>
+                <th>Niveau</th>
+                <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of classes()">
+                <td style="font-weight: 600;">{{ c.nom_classe }}</td>
+                <td>
+                  <span class="badge-level">{{ c.niveau }}</span>
+                </td>
+                <td style="text-align: right; padding-right: 1.5rem;">
+                  <button (click)="deleteClasse(c.id)" class="action-btn-delete" title="Supprimer la classe">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="classes().length === 0">
+                <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                  Aucune classe enregistrée. Utilisez le formulaire pour en ajouter.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Notification Toast -->
+  <div *ngIf="message()" class="custom-toast">
+    <i class="fa-solid fa-circle-info text-info"></i>
+    <span>{{ message() }}</span>
+  </div>
+</div>
