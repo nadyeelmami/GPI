@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Validator;
 // On écrit "extends Controller" pour dire qu'il utilise la base existante
 class ClasseController extends Controller
 {
-    // Fonction pour lister toutes les classes
+    // Fonction pour lister toutes les classes, triées proprement par filière et par niveau
     public function index()
     {
-        return response()->json(Classe::all(), 200);
+        $classes = Classe::orderBy('nom_classe')
+            ->orderByRaw("FIELD(niveau, 'L1', 'L2', 'L3', 'M1', 'M2')")
+            ->get();
+        return response()->json($classes, 200);
     }
 
     // Fonction pour enregistrer une nouvelle classe

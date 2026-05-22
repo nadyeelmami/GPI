@@ -1,1 +1,224 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  
+  <!-- Sidebar -->
+  <aside class="sidebar no-print">
+    <div>
+      <div class="brand-section">
+        <h4 class="brand-logo">GPI PORTAIL</h4>
+        <p class="brand-subtitle">Espace Étudiant</p>
+      </div>
+
+      <nav class="menu-section">
+        <a class="menu-link active" href="#" (click)="$event.preventDefault();">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Mon Bulletin</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User profile at the bottom of sidebar -->
+    <div class="user-profile-card" *ngIf="studentUser()">
+      <div class="avatar">{{ studentUser().name.substring(0, 2).toUpperCase() }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ studentUser().name }}</span>
+        <span class="user-role">Étudiant</span>
+      </div>
+      <button (click)="logout()" class="logout-btn" title="Se déconnecter">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Top Header -->
+    <header class="header-container no-print" *ngIf="studentUser()">
+      <div class="header-title">
+        <h2>Bonjour, {{ studentUser().name }}</h2>
+        <p>Consultez votre bulletin de notes officiel et suivez vos performances académiques.</p>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" style="display: flex; justify-content: center; align-items: center; height: 300px;">
+      <div style="font-weight: 600; color: #64748b; font-size: 1.1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fa-solid fa-circle-notch fa-spin text-primary" style="font-size: 1.5rem;"></i>
+        <span>Chargement de vos informations académiques...</span>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!isLoading()">
+      
+      <!-- Bulletin NON Publié -->
+      <div *ngIf="!isBulletinPublished()" class="custom-card" style="padding: 4rem 3rem; text-align: center; max-width: 650px; margin: 3rem auto; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);">
+        <div style="font-size: 4.5rem; color: #cbd5e1; margin-bottom: 2rem;">
+          <i class="fa-solid fa-circle-exclamation text-warning" style="color: #eab308 !important;"></i>
+        </div>
+        <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 1rem; font-size: 1.5rem;">Bulletin Non Disponible</h4>
+        <p style="color: #64748b; font-size: 1rem; line-height: 1.7; margin-bottom: 2rem;">
+          Votre bulletin n'est pas encore disponible. L'administration n'a pas encore publié votre bulletin. 
+          Veuillez patienter ou contacter le secrétariat si vous estimez qu'il s'agit d'une erreur.
+        </p>
+        <div style="display: inline-block; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.5rem; text-align: left; max-width: 100%;">
+          <p style="margin: 0; font-size: 0.85rem; color: #475569;">
+            <strong style="color: #0f172a;">Classe rattachée :</strong> 
+            {{ studentUser()?.classes?.[0]?.nom_classe || 'Aucune classe' }} 
+            ({{ studentUser()?.classes?.[0]?.niveau || '-' }})
+          </p>
+          <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #475569;">
+            <strong style="color: #0f172a;">Année scolaire :</strong> 
+            {{ studentUser()?.classes?.[0]?.annee_scolaire || '2025-2026' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Bulletin Publié -->
+      <div *ngIf="isBulletinPublished() && bulletinData()" style="max-width: 900px; margin: 0 auto 3rem auto;">
+        
+        <!-- Button Panel -->
+        <div class="no-print" style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;">
+          <button (click)="printBulletin()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-print"></i> Imprimer le bulletin
+          </button>
+        </div>
+
+        <!-- Official Report Card Sheet -->
+        <div class="custom-card bulletin-sheet" style="padding: 3rem; background-color: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); position: relative;">
+          
+          <!-- Seal Background watermark (decorative) -->
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); font-size: 15rem; color: rgba(15, 23, 42, 0.02); pointer-events: none; z-index: 1;">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+
+          <div style="position: relative; z-index: 2;">
+            
+            <!-- School Header -->
+            <div style="display: flex; justify-content: space-between; border-bottom: 3px double #0284c7; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+              <div style="flex: 1.5;">
+                <h3 style="font-weight: 800; font-size: 1.35rem; color: #0284c7; margin: 0; text-transform: uppercase;">
+                  GROUPE DE PLANIFICATION ET D'INFORMATIQUE
+                </h3>
+                <p style="font-weight: 700; color: #64748b; font-size: 0.8rem; margin: 0.25rem 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Établissement d'Enseignement Supérieur Privé
+                </p>
+                <p style="color: #94a3b8; font-size: 0.75rem; margin: 0.2rem 0 0 0;">
+                  Nouakchott, Mauritanie | E-mail: scolarite&#64;gpi.mr
+                </p>
+              </div>
+
+              <!-- Logo Emblem -->
+              <div style="flex: 1; text-align: center; display: flex; justify-content: center; align-items: center;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: 3px solid #0284c7; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-graduation-cap" style="font-size: 2.2rem; color: #0284c7;"></i>
+                </div>
+              </div>
+
+              <div style="flex: 1.5; text-align: right;">
+                <h4 style="font-weight: 700; font-size: 1rem; color: #0f172a; margin: 0; text-transform: uppercase;">
+                  RELEVÉ DE NOTES OFFICIEL
+                </h4>
+                <p style="color: #64748b; font-size: 0.85rem; margin: 0.25rem 0 0 0; font-weight: 600;">
+                  Année Académique : {{ bulletinData()?.student?.classes?.[0]?.annee_scolaire || '2025-2026' }}
+                </p>
+                <p style="color: #94a3b8; font-size: 0.75rem; margin: 0.2rem 0 0 0;">
+                  Filière / Niveau : <span style="font-weight: 700; color: #0f172a;">{{ bulletinData()?.student?.classes?.[0]?.nom_classe || 'N/A' }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Student Description block -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+              <div>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #475569;">
+                  Nom de l'Étudiant : <strong style="color: #0f172a; font-size: 0.95rem;">{{ bulletinData()?.student?.name }}</strong>
+                </p>
+                <p style="margin: 0; font-size: 0.9rem; color: #475569;">
+                  Numéro Matricule : <strong style="color: #0284c7; font-size: 0.95rem;">{{ bulletinData()?.student?.matricule || '-' }}</strong>
+                </p>
+              </div>
+              <div style="text-align: right;">
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #475569;">
+                  Adresse E-mail : <strong style="color: #0f172a; font-size: 0.95rem;">{{ bulletinData()?.student?.email }}</strong>
+                </p>
+                <p style="margin: 0; font-size: 0.9rem; color: #475569;">
+                  Statut : <span class="badge-level" style="background-color: #f0fdf4; color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; padding: 0.25rem 0.6rem;">RÉGULIER</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Grades Table -->
+            <div style="margin-bottom: 2.5rem;">
+              <table class="custom-table" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden;">
+                <thead>
+                  <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                    <th style="font-weight: 700; color: #1e293b;">Matière d'Enseignement</th>
+                    <th style="text-align: center; font-weight: 700; color: #1e293b; width: 120px;">Coefficient</th>
+                    <th style="text-align: center; font-weight: 700; color: #1e293b; width: 140px;">Note obtenue (/20)</th>
+                    <th style="text-align: center; font-weight: 700; color: #1e293b; width: 150px;">Évaluation</th>
+                    <th style="font-weight: 700; color: #1e293b; width: 200px;">Professeur</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let note of bulletinData().notes">
+                    <td style="font-weight: 600; color: #1e293b;">{{ note.nom_matiere }}</td>
+                    <td style="text-align: center; font-weight: 600; color: #475569;">{{ note.coefficient }}</td>
+                    <td style="text-align: center; font-weight: 800; color: #0284c7; font-size: 1.05rem;">
+                      {{ note.valeur_note.toFixed(2) }}
+                    </td>
+                    <td style="text-align: center; font-size: 0.85rem; color: #64748b;">
+                      <span class="badge-level" style="background-color: #f1f5f9; color: #475569; font-weight: 600;">
+                        {{ note.type_evaluation || 'Examen' }}
+                      </span>
+                    </td>
+                    <td style="color: #475569; font-size: 0.88rem; font-style: italic;">
+                      {{ note.prof_name || 'Non spécifié' }}
+                    </td>
+                  </tr>
+                  <tr *ngIf="bulletinData().notes.length === 0">
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 3rem;">
+                      Aucune note publiée n'a été enregistrée pour ce bulletin.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Footer Summary of Bulletin -->
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; border-top: 2px solid #0284c7; padding-top: 1.5rem; margin-top: 2rem;">
+              <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #16a34a;">
+                <div>
+                  <h5 style="margin: 0 0 0.5rem 0; font-weight: 800; color: #14532d; font-size: 1rem;">Résultats Académiques</h5>
+                  <p style="margin: 0; font-size: 0.95rem; color: #166534;">
+                    Moyenne Générale : <strong style="font-size: 1.2rem; color: #15803d; margin-left: 0.25rem;">{{ bulletinData().moyenneG.toFixed(2) }} / 20</strong>
+                  </p>
+                </div>
+                <div style="text-align: right;">
+                  <span class="badge-level" style="background-color: #15803d; color: #ffffff; font-weight: 800; padding: 0.5rem 1rem; font-size: 0.9rem; box-shadow: 0 4px 8px rgba(22, 163, 74, 0.15);">
+                    {{ bulletinData().mention }}
+                  </span>
+                </div>
+              </div>
+
+              <div style="text-align: right; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 0.5rem;">
+                <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Fait à Nouakchott, le {{ todayStr }}</p>
+                <p style="font-weight: 700; color: #1e293b; margin: 0.5rem 0 0 0; text-decoration: underline;">Le Secrétariat Académique</p>
+                <div style="height: 65px; width: 130px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.65rem; text-transform: uppercase;">Cachet Officiel</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </ng-container>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div *ngIf="message()" class="custom-toast">
+    <i class="fa-solid fa-circle-info text-info"></i>
+    <span>{{ message() }}</span>
+  </div>
+</div>

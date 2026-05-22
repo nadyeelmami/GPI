@@ -1,1 +1,181 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand-section">
+        <h4 class="brand-logo">ISCAE PROF</h4>
+        <p class="brand-subtitle">Saisie des Notes</p>
+      </div>
+
+      <nav class="menu-section">
+        <a class="menu-link active" href="#" (click)="$event.preventDefault();">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Mes Classes & Notes</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User profile at the bottom of sidebar -->
+    <div class="user-profile-card" *ngIf="teacherUser()">
+      <div class="avatar">{{ teacherUser().name.substring(0, 2).toUpperCase() }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ teacherUser().name }}</span>
+        <span class="user-role">Enseignant</span>
+      </div>
+      <button (click)="logout()" class="logout-btn" title="Se déconnecter">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="header-container" *ngIf="teacherUser()">
+      <div class="header-title">
+        <h2>Espace Enseignant - ISCAE</h2>
+        <p>Gérez et publiez les notes pour vos matières affectées.</p>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" style="display: flex; justify-content: center; align-items: center; height: 300px;">
+      <div style="font-weight: 600; color: #64748b; font-size: 1.1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fa-solid fa-circle-notch fa-spin text-primary" style="font-size: 1.5rem;"></i>
+        <span>Chargement des données...</span>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!isLoading()">
+      <!-- No Affectation Assigned -->
+      <div *ngIf="!affectation()" class="custom-card" style="padding: 3rem; text-align: center; max-width: 600px; margin: 4rem auto;">
+        <div style="font-size: 3.5rem; color: #cbd5e1; margin-bottom: 1.5rem;">
+          <i class="fa-solid fa-circle-exclamation text-warning"></i>
+        </div>
+        <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Aucune affectation trouvée</h4>
+        <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
+          Vous n'avez pas encore été affecté à une classe ou une matière par l'administration. 
+          Veuillez contacter le bureau d'administration de l'ISCAE pour finaliser votre affectation.
+        </p>
+        <button (click)="logout()" class="btn-primary-custom" style="width: auto; margin-top: 1.5rem; padding: 0.75rem 2rem;">
+          Se Déconnecter
+        </button>
+      </div>
+
+      <!-- Active Grading Panel -->
+      <div *ngIf="affectation()" class="dashboard-grid" style="grid-template-columns: 1fr;">
+        <div class="custom-card">
+          <!-- Course Details Header -->
+          <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background-color: #faf5ff; border-bottom: 1px solid #f3e8ff;">
+            <div>
+              <span class="badge-level" style="background-color: #7c3aed; color: #ffffff; padding: 0.35rem 1rem; font-weight: 700; text-transform: uppercase;">
+                {{ affectation().classe.nom_classe }} ({{ affectation().classe.niveau }})
+              </span>
+              <h4 style="font-weight: 800; color: #1e1b4b; margin: 0.5rem 0 0 0; font-size: 1.35rem;">
+                Matière : {{ affectation().matiere.nom_matiere }}
+              </h4>
+            </div>
+            
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <span *ngIf="isPublished()" class="badge-level" style="background-color: #f0fdf4; color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
+                <i class="fa-solid fa-circle-check"></i> NOTES PUBLIÉES (ADMIN-OK)
+              </span>
+              <span *ngIf="!isPublished()" class="badge-level" style="background-color: #fffbeb; color: #d97706; font-weight: 700; border: 1px solid #fef3c7; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
+                <i class="fa-solid fa-clock"></i> SAISIE EN COURS (MODIFIABLE)
+              </span>
+            </div>
+          </div>
+
+          <!-- Alert Note if Published -->
+          <div *ngIf="isPublished()" style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; color: #15803d; padding: 1rem 1.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fa-solid fa-circle-info" style="font-size: 1.1rem;"></i>
+            <span>
+              <strong>Information :</strong> Les notes de cette classe ont été publiées officiellement. 
+              Par mesure de sécurité, elles sont verrouillées et ne peuvent plus être éditées.
+            </span>
+          </div>
+
+          <div class="card-body-custom" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th style="width: 140px;">Matricule</th>
+                    <th>Nom de l'étudiant</th>
+                    <th>Email</th>
+                    <th style="width: 180px;">Type Évaluation</th>
+                    <th style="text-align: center; width: 140px;">Note (/20)</th>
+                    <th style="text-align: center; width: 150px;">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let s of studentsGrades(); let i = index">
+                    <td style="font-weight: 600; color: #0284c7;">{{ s.matricule || '-' }}</td>
+                    <td style="font-weight: 700; color: #0f172a;">{{ s.name }}</td>
+                    <td style="color: #64748b; font-size: 0.85rem;">{{ s.email }}</td>
+                    <td>
+                      <select 
+                        [(ngModel)]="s.type_evaluation" 
+                        class="form-control-custom" 
+                        style="padding: 0.4rem 0.75rem; font-size: 0.85rem;"
+                        [disabled]="s.statut_validation === 1"
+                      >
+                        <option value="Examen">Examen</option>
+                        <option value="CC1">CC1</option>
+                        <option value="CC2">CC2</option>
+                        <option value="TD">TD</option>
+                        <option value="TP">TP</option>
+                      </select>
+                    </td>
+                    <td style="text-align: center;">
+                      <input 
+                        type="number" 
+                        [(ngModel)]="s.valeur_note" 
+                        min="0" 
+                        max="20" 
+                        step="0.25"
+                        class="form-control-custom" 
+                        style="text-align: center; font-weight: 800; font-size: 1.05rem; width: 90px; margin: 0 auto; color: #0284c7;"
+                        placeholder="--"
+                        [disabled]="s.statut_validation === 1"
+                      >
+                    </td>
+                    <td style="text-align: center;">
+                      <span *ngIf="s.statut_validation === 1" class="badge-level" style="background-color: #e6fcf5; color: #0ca678;">
+                        Publiée
+                      </span>
+                      <span *ngIf="s.statut_validation === 0" class="badge-level" style="background-color: #f1f3f5; color: #868e96;">
+                        Brouillon
+                      </span>
+                    </td>
+                  </tr>
+                  <tr *ngIf="studentsGrades().length === 0">
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 3rem;">
+                      Aucun étudiant inscrit dans cette classe pour le moment.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Actions Buttons -->
+            <div *ngIf="studentsGrades().length > 0 && !isPublished()" style="padding: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #f1f5f9; background-color: #f8fafc;">
+              <button (click)="saveDraft()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; background: #64748b; box-shadow: none; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-floppy-disk"></i> Enregistrer Brouillon
+              </button>
+              <button (click)="publishNotes()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-paper-plane"></i> Publier les notes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+
+  <!-- Notification Toast -->
+  <div *ngIf="message()" class="custom-toast">
+    <i class="fa-solid fa-circle-info text-info"></i>
+    <span>{{ message() }}</span>
+  </div>
+</div>

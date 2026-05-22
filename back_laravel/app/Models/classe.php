@@ -17,4 +17,9 @@ class Classe extends Model
         'niveau',
         'annee_scolaire'
     ];
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'etudiant_classe', 'classe_id', 'user_id');
+    }
 }

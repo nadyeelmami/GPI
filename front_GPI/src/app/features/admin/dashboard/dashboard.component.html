@@ -9,17 +9,21 @@
       </div>
 
       <nav class="menu-section">
-        <a class="menu-link active" href="#">
-          <i class="fa-solid fa-chart-pie"></i>
-          <span>Tableau de Bord</span>
+        <a class="menu-link" [class.active]="activeTab() === 'classes'" (click)="selectTab('classes'); $event.preventDefault();" href="#">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Classes</span>
         </a>
-        <a class="menu-link" href="#">
-          <i class="fa-solid fa-users"></i>
-          <span>Utilisateurs</span>
+        <a class="menu-link" [class.active]="activeTab() === 'students'" (click)="selectTab('students'); $event.preventDefault();" href="#">
+          <i class="fa-solid fa-user-graduate"></i>
+          <span>Étudiants</span>
         </a>
-        <a class="menu-link" href="#">
-          <i class="fa-solid fa-book"></i>
-          <span>Matières</span>
+        <a class="menu-link" [class.active]="activeTab() === 'teachers'" (click)="selectTab('teachers'); $event.preventDefault();" href="#">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Enseignants</span>
+        </a>
+        <a class="menu-link" [class.active]="activeTab() === 'bulletins'" (click)="selectTab('bulletins'); $event.preventDefault();" href="#">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Bulletins</span>
         </a>
       </nav>
     </div>
@@ -41,14 +45,21 @@
   <main class="main-content">
     <header class="header-container">
       <div class="header-title">
-        <h2>Tableau de Bord</h2>
-        <p>Gérez les classes de l'ISCAE et supervisez les paramètres du système.</p>
+        <h2 *ngIf="activeTab() === 'classes'">Classes & Tableau de Bord</h2>
+        <h2 *ngIf="activeTab() === 'students'">Gestion des Étudiants</h2>
+        <h2 *ngIf="activeTab() === 'teachers'">Gestion des Enseignants</h2>
+        <h2 *ngIf="activeTab() === 'bulletins'">Bulletins de Notes</h2>
+        
+        <p *ngIf="activeTab() === 'classes'">Gérez les classes de l'ISCAE et supervisez les paramètres du système.</p>
+        <p *ngIf="activeTab() === 'students'">Ajoutez, modifiez et gérez les étudiants inscrits à l'ISCAE.</p>
+        <p *ngIf="activeTab() === 'teachers'">Ajoutez, modifiez et gérez le corps enseignant de l'ISCAE.</p>
+        <p *ngIf="activeTab() === 'bulletins'">Générez, publiez et imprimez les bulletins de notes des étudiants de l'ISCAE.</p>
       </div>
     </header>
 
     <!-- Statistics Grid -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer;" (click)="selectTab('classes')">
         <div class="stat-details">
           <h4>{{ classes().length }}</h4>
           <span>Classes Actives</span>
@@ -58,9 +69,9 @@
         </div>
       </div>
       
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer;" (click)="selectTab('teachers')">
         <div class="stat-details">
-          <h4>18</h4>
+          <h4>{{ teachers().length }}</h4>
           <span>Enseignants</span>
         </div>
         <div class="stat-icon-wrapper icon-purple">
@@ -68,9 +79,9 @@
         </div>
       </div>
 
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer;" (click)="selectTab('students')">
         <div class="stat-details">
-          <h4>245</h4>
+          <h4>{{ students().length }}</h4>
           <span>Étudiants inscrits</span>
         </div>
         <div class="stat-icon-wrapper icon-green">
@@ -82,77 +93,542 @@
     <!-- Dashboard layout grid -->
     <div class="dashboard-grid">
       
-      <!-- Adding Class Form Card -->
-      <div class="custom-card">
-        <div class="card-header-custom">
-          <h5>Ajouter une Classe</h5>
-        </div>
-        <div class="card-body-custom">
-          <div class="mb-4">
-            <label class="form-label-custom">Nom de la classe</label>
-            <input 
-              type="text" 
-              [(ngModel)]="formClasse.nom_classe" 
-              class="form-control-custom"
-              placeholder="Ex: Licence 1 Informatique"
-            >
+      <!-- ================= CLASSES SECTION ================= -->
+      <ng-container *ngIf="activeTab() === 'classes'">
+        <!-- Adding Class Form Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>Ajouter une Classe</h5>
           </div>
-          
-          <div class="mb-4">
-            <label class="form-label-custom">Niveau d'études</label>
-            <select [(ngModel)]="formClasse.niveau" class="form-control-custom">
-              <option value="L1">Licence 1 (L1)</option>
-              <option value="L2">Licence 2 (L2)</option>
-              <option value="L3">Licence 3 (L3)</option>
-              <option value="M1">Master 1 (M1)</option>
-              <option value="M2">Master 2 (M2)</option>
-            </select>
+          <div class="card-body-custom">
+            <div class="mb-4">
+              <label class="form-label-custom">Filière / Nom de la classe</label>
+              <select [(ngModel)]="formClasse.nom_classe" class="form-control-custom">
+                <option value="IG">IG (Informatique de Gestion)</option>
+                <option value="FC">FC (Finance Comptabilité)</option>
+                <option value="GRH">GRH (Gestion des Ressources Humaines)</option>
+                <option value="BA">BA (Banking & Administration)</option>
+                <option value="DI">DI (Développement Informatique)</option>
+                <option value="RT">RT (Réseaux & Télécoms)</option>
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label class="form-label-custom">Niveau d'études</label>
+              <select [(ngModel)]="formClasse.niveau" class="form-control-custom">
+                <option value="L1">Licence 1 (L1)</option>
+                <option value="L2">Licence 2 (L2)</option>
+                <option value="L3">Licence 3 (L3)</option>
+                <option value="M1">Master 1 (M1)</option>
+                <option value="M2">Master 2 (M2)</option>
+              </select>
+            </div>
+
+            <button (click)="saveClasse()" class="btn-primary-custom mt-2">
+              <i class="fa-solid fa-circle-check me-2"></i> Enregistrer
+            </button>
           </div>
+        </div>
 
-          <button (click)="saveClasse()" class="btn-primary-custom mt-2">
-            <i class="fa-solid fa-circle-check me-2"></i> Enregistrer
-          </button>
+        <!-- Existing Classes List Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>Classes Existantes</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Nom de la classe (Filière)</th>
+                  <th>Niveau</th>
+                  <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of classes()">
+                  <td style="font-weight: 700; color: #0f172a;">{{ c.nom_classe }}</td>
+                  <td>
+                    <span class="badge-level">{{ c.niveau }}</span>
+                  </td>
+                  <td style="text-align: right; padding-right: 1.5rem;">
+                    <button (click)="deleteClasse(c.id)" class="action-btn-delete" title="Supprimer la classe">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="classes().length === 0">
+                  <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                    Aucune classe enregistrée. Utilisez le formulaire pour en ajouter.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </ng-container>
 
-      <!-- Existing Classes List Card -->
-      <div class="custom-card">
-        <div class="card-header-custom">
-          <h5>Classes Existantes</h5>
+      <!-- ================= STUDENTS SECTION ================= -->
+      <ng-container *ngIf="activeTab() === 'students'">
+        <!-- Adding/Editing Student Form Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>{{ formStudent.id ? 'Modifier l\'Étudiant' : 'Ajouter un Étudiant' }}</h5>
+          </div>
+          <div class="card-body-custom">
+            <div class="mb-4">
+              <label class="form-label-custom">Nom Complet</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formStudent.name" 
+                class="form-control-custom"
+                placeholder="Ex: Mohamed Lemine"
+              >
+            </div>
+            
+            <div class="mb-4">
+              <label class="form-label-custom">Email</label>
+              <input 
+                type="email" 
+                [(ngModel)]="formStudent.email" 
+                class="form-control-custom"
+                placeholder="Ex: I12345@etu.iscae.mr"
+              >
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Matricule</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formStudent.matricule" 
+                class="form-control-custom"
+                placeholder="Ex: I12345"
+              >
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Classe</label>
+              <select [(ngModel)]="formStudent.classe_id" class="form-control-custom">
+                <option value="">-- Sélectionner une classe --</option>
+                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Mot de Passe (Facultatif)</label>
+              <input 
+                type="password" 
+                [(ngModel)]="formStudent.password" 
+                class="form-control-custom"
+                [placeholder]="formStudent.id ? 'Laisser vide pour ne pas modifier' : 'Automatique : [matricule]iscae'"
+              >
+              <p style="font-size: 0.72rem; color: #64748b; margin: 0.25rem 0 0 0; font-style: italic;">
+                * Par défaut: matricule + "iscae" (ex: I12345iscae)
+              </p>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button (click)="saveStudent()" class="btn-primary-custom mt-2">
+                <i class="fa-solid fa-circle-check me-2"></i> {{ formStudent.id ? 'Modifier' : 'Enregistrer' }}
+              </button>
+              <button *ngIf="formStudent.id" (click)="resetStudentForm()" class="btn-primary-custom mt-2" style="background: #64748b; box-shadow: none;">
+                Annuler
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Nom de la classe</th>
-                <th>Niveau</th>
-                <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let c of classes()">
-                <td style="font-weight: 600;">{{ c.nom_classe }}</td>
-                <td>
-                  <span class="badge-level">{{ c.niveau }}</span>
-                </td>
-                <td style="text-align: right; padding-right: 1.5rem;">
-                  <button (click)="deleteClasse(c.id)" class="action-btn-delete" title="Supprimer la classe">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </td>
-              </tr>
-              <tr *ngIf="classes().length === 0">
-                <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">
-                  Aucune classe enregistrée. Utilisez le formulaire pour en ajouter.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <!-- Students List Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>Liste des Étudiants</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Matricule</th>
+                  <th>Nom complet</th>
+                  <th>Email</th>
+                  <th>Classe</th>
+                  <th>Statut Bulletin</th>
+                  <th style="text-align: right; padding-right: 1.5rem; width: 140px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of students()">
+                  <td style="font-weight: 600; color: #1560bd;">{{ s.matricule || '-' }}</td>
+                  <td style="font-weight: 600;">{{ s.name }}</td>
+                  <td>{{ s.email }}</td>
+                  <td>
+                    <span *ngIf="s.classes && s.classes.length > 0" class="badge-level">
+                      {{ s.classes[0].nom_classe }} ({{ s.classes[0].niveau }})
+                    </span>
+                    <span *ngIf="!s.classes || s.classes.length === 0" style="color: #94a3b8; font-size: 0.85rem;">
+                      Non assigné
+                    </span>
+                  </td>
+                  <td>
+                    <span *ngIf="s.bulletin_publie === 1 || s.bulletin_publie === true" class="badge-level" style="background-color: #e6fcf5; color: #0ca678; font-weight: 700;">
+                      Publié
+                    </span>
+                    <span *ngIf="s.bulletin_publie !== 1 && s.bulletin_publie !== true" class="badge-level" style="background-color: #f1f3f5; color: #868e96; font-weight: 700;">
+                      Non Publié
+                    </span>
+                  </td>
+                  <td style="text-align: right; padding-right: 1.5rem;">
+                    <button (click)="generateBulletin(s.id)" class="action-btn-bulletin" title="Générer le bulletin de notes">
+                      <i class="fa-solid fa-file-invoice"></i>
+                    </button>
+                    <button (click)="editStudent(s)" class="action-btn-edit" title="Modifier l'étudiant">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button (click)="deleteStudent(s.id)" class="action-btn-delete" title="Supprimer l'étudiant">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="students().length === 0">
+                  <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                    Aucun étudiant enregistré. Utilisez le formulaire pour en ajouter.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      </ng-container>
+
+      <!-- ================= TEACHERS SECTION ================= -->
+      <ng-container *ngIf="activeTab() === 'teachers'">
+        <!-- Adding/Editing Teacher Form Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>{{ formTeacher.id ? 'Modifier l\'Enseignant' : 'Ajouter un Enseignant' }}</h5>
+          </div>
+          <div class="card-body-custom">
+            <div class="mb-4">
+              <label class="form-label-custom">Nom Complet</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formTeacher.name" 
+                class="form-control-custom"
+                placeholder="Ex: Dr. Ahmed"
+              >
+            </div>
+            
+            <div class="mb-4">
+              <label class="form-label-custom">Email</label>
+              <input 
+                type="email" 
+                [(ngModel)]="formTeacher.email" 
+                class="form-control-custom"
+                placeholder="Ex: prof@iscae.mr"
+              >
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Classe Enseignée</label>
+              <select [(ngModel)]="formTeacher.classe_id" (ngModelChange)="onClasseChange($event)" class="form-control-custom">
+                <option value="">-- Choisir la classe --</option>
+                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Matière Enseignée</label>
+              <select [(ngModel)]="formTeacher.matiere_id" class="form-control-custom">
+                <option value="">-- Choisir la matière --</option>
+                <option *ngIf="filteredMatieres().length === 0" value="" disabled>-- Choisir d'abord une classe --</option>
+                <option *ngFor="let m of filteredMatieres()" [value]="m.id">{{ m.nom_matiere }} (Coeff: {{ m.coefficient }})</option>
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label-custom">Mot de Passe (Facultatif)</label>
+              <input 
+                type="password" 
+                [(ngModel)]="formTeacher.password" 
+                class="form-control-custom"
+                [placeholder]="formTeacher.id ? 'Laisser vide pour ne pas modifier' : 'Automatique : profiscae'"
+              >
+              <p style="font-size: 0.72rem; color: #64748b; margin: 0.25rem 0 0 0; font-style: italic;">
+                * Par défaut: "profiscae"
+              </p>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button (click)="saveTeacher()" class="btn-primary-custom mt-2">
+                <i class="fa-solid fa-circle-check me-2"></i> {{ formTeacher.id ? 'Modifier' : 'Enregistrer' }}
+              </button>
+              <button *ngIf="formTeacher.id" (click)="resetTeacherForm()" class="btn-primary-custom mt-2" style="background: #64748b; box-shadow: none;">
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teachers List Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>Liste des Enseignants</h5>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Nom complet</th>
+                  <th>Email</th>
+                  <th>Classe enseignée</th>
+                  <th>Matière</th>
+                  <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of teachers()">
+                  <td style="font-weight: 600;">{{ t.name }}</td>
+                  <td>{{ t.email }}</td>
+                  <td>
+                    <span *ngIf="t.affectations && t.affectations.length > 0 && t.affectations[0].classe" class="badge-level" style="background-color: #f0fdf4; color: #16a34a;">
+                      {{ t.affectations[0].classe.nom_classe }} ({{ t.affectations[0].classe.niveau }})
+                    </span>
+                    <span *ngIf="!t.affectations || t.affectations.length === 0 || !t.affectations[0].classe" style="color: #94a3b8; font-size: 0.85rem;">
+                      Aucune assignée
+                    </span>
+                  </td>
+                  <td>
+                    <span *ngIf="t.affectations && t.affectations.length > 0 && t.affectations[0].matiere" class="badge-level" style="background-color: #faf5ff; color: #7c3aed;">
+                      {{ t.affectations[0].matiere.nom_matiere }}
+                    </span>
+                    <span *ngIf="!t.affectations || t.affectations.length === 0 || !t.affectations[0].matiere" style="color: #94a3b8; font-size: 0.85rem;">
+                      Aucune assignée
+                    </span>
+                  </td>
+                  <td style="text-align: right; padding-right: 1.5rem;">
+                    <button (click)="editTeacher(t)" class="action-btn-edit" title="Modifier l'enseignant">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button (click)="deleteTeacher(t.id)" class="action-btn-delete" title="Supprimer l'enseignant">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="teachers().length === 0">
+                  <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                    Aucun enseignant enregistré. Utilisez le formulaire pour en ajouter.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ================= BULLETINS SECTION ================= -->
+      <ng-container *ngIf="activeTab() === 'bulletins'">
+        <!-- Filter Card -->
+        <div class="custom-card">
+          <div class="card-header-custom">
+            <h5>Filtrer les Bulletins</h5>
+          </div>
+          <div class="card-body-custom">
+            <div class="mb-4">
+              <label class="form-label-custom">Sélectionner une Classe</label>
+              <select [ngModel]="selectedBulletinClasseId()" (ngModelChange)="selectedBulletinClasseId.set($event)" class="form-control-custom">
+                <option value="">Tous les étudiants</option>
+                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+              </select>
+            </div>
+            
+            <div style="background-color: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #f1f5f9; margin-top: 1rem;">
+              <p style="font-size: 0.85rem; color: #475569; margin: 0 0 0.5rem 0; font-weight: 600;">💡 Astuce de Gestion</p>
+              <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
+                Sélectionnez une classe pour afficher uniquement ses étudiants. Vous pouvez générer, imprimer et publier individuellement les bulletins de notes de chaque élève.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Students & Bulletins List Card -->
+        <div class="custom-card">
+          <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center;">
+            <h5>Moyennes et Bulletins</h5>
+            <span class="badge-level" style="background-color: #e8f0fe; color: #1560bd;">
+              {{ filteredStudentsForBulletins().length }} Étudiant(s)
+            </span>
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Matricule</th>
+                  <th>Nom complet</th>
+                  <th>Classe</th>
+                  <th style="text-align: center;">Moyenne Générale</th>
+                  <th style="text-align: center;">Mention</th>
+                  <th style="text-align: center;">Statut Publication</th>
+                  <th style="text-align: right; padding-right: 1.5rem; width: 140px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of filteredStudentsForBulletins()">
+                  <td style="font-weight: 600; color: #1560bd;">{{ s.matricule || '-' }}</td>
+                  <td style="font-weight: 600;">{{ s.name }}</td>
+                  <td>
+                    <span *ngIf="s.classes && s.classes.length > 0" class="badge-level">
+                      {{ s.classes[0].nom_classe }} ({{ s.classes[0].niveau }})
+                    </span>
+                    <span *ngIf="!s.classes || s.classes.length === 0" style="color: #94a3b8; font-size: 0.85rem;">
+                      Non assigné
+                    </span>
+                  </td>
+                  <td style="text-align: center; font-weight: 700;">
+                    <span *ngIf="s.moyenneG !== undefined && s.moyenneG !== null" [style.color]="s.moyenneG >= 10 ? '#16a34a' : '#ef4444'">
+                      {{ s.moyenneG.toFixed(2) }} / 20
+                    </span>
+                    <span *ngIf="s.moyenneG === undefined || s.moyenneG === null" style="color: #94a3b8; font-style: italic;">
+                      Aucune note
+                    </span>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="s.mention" class="badge-level" style="background-color: #faf5ff; color: #7c3aed; font-weight: 600;">
+                      {{ s.mention }}
+                    </span>
+                    <span *ngIf="!s.mention" style="color: #94a3b8;">
+                      -
+                    </span>
+                  </td>
+                  <td style="text-align: center;">
+                    <span *ngIf="s.bulletin_publie === 1 || s.bulletin_publie === true" class="badge-level" style="background-color: #e6fcf5; color: #0ca678; font-weight: 700;">
+                      Publié
+                    </span>
+                    <span *ngIf="s.bulletin_publie !== 1 && s.bulletin_publie !== true" class="badge-level" style="background-color: #f1f3f5; color: #868e96; font-weight: 700;">
+                      Non Publié
+                    </span>
+                  </td>
+                  <td style="text-align: right; padding-right: 1.5rem;">
+                    <button (click)="generateBulletin(s.id)" class="btn-primary-custom" style="padding: 0.4rem 0.8rem; font-size: 0.82rem; width: auto; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);">
+                      <i class="fa-solid fa-file-invoice me-1"></i> Bulletin
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredStudentsForBulletins().length === 0">
+                  <td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                    Aucun étudiant trouvé pour cette sélection.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </ng-container>
 
     </div>
   </main>
+
+  <!-- ================= BULLETIN MODAL ================= -->
+  <div *ngIf="showBulletinModal() && selectedBulletin()" class="modal-backdrop">
+    <div class="bulletin-modal-container">
+      <div class="modal-header-custom" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <h4 style="font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-file-invoice text-primary"></i> Bulletin de Notes Officiel
+        </h4>
+        <button (click)="closeBulletin()" class="logout-btn" style="color: #64748b; font-size: 1.25rem;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="printable-bulletin" class="bulletin-sheet">
+        <!-- School Header -->
+        <div class="bulletin-header" style="text-align: center; margin-bottom: 2rem; border-bottom: 2px double #cbd5e1; padding-bottom: 1.5rem;">
+          <h3 style="font-weight: 800; font-size: 1.2rem; margin: 0; text-transform: uppercase; color: #1e293b; letter-spacing: 0.5px;">République Islamique de Mauritanie</h3>
+          <p style="font-size: 0.72rem; color: #64748b; margin: 0.2rem 0; text-transform: uppercase; letter-spacing: 1px;">Honneur - Fraternité - Justice</p>
+          <h4 style="font-weight: 700; font-size: 1.1rem; color: #1560bd; margin: 0.5rem 0 0 0;">INSTITUT SUPÉRIEUR DES CADRES DE L'ÉTAT (ISCAE)</h4>
+          <p style="font-size: 0.85rem; font-weight: 600; color: #475569; margin: 0.25rem 0 0 0;">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
+        </div>
+
+        <!-- Simulation Notice if using mock data -->
+        <div *ngIf="selectedBulletin().isMock" class="no-print" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span><strong>Démonstration :</strong> Aucune note n'est actuellement saisie pour cet étudiant en base. Des notes ont été générées pour illustrer le bulletin.</span>
+        </div>
+
+        <!-- Student Details Block -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; background-color: #f8fafc; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; border: 1px solid #f1f5f9;">
+          <div>
+            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Nom de l'étudiant :</strong> <span style="color: #0f172a; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.name }}</span></p>
+            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Email académique :</strong> <span style="color: #0f172a; margin-left: 0.25rem;">{{ selectedBulletin().student.email }}</span></p>
+            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;" class="no-print">
+              <strong>Statut de publication :</strong> 
+              <span *ngIf="selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true" class="badge-level" style="margin-left: 0.25rem; background-color: #e6fcf5; color: #0ca678; font-weight: 700;">PUBLIÉ</span>
+              <span *ngIf="selectedBulletin().student.bulletin_publie !== 1 && selectedBulletin().student.bulletin_publie !== true" class="badge-level" style="margin-left: 0.25rem; background-color: #f1f3f5; color: #868e96; font-weight: 700;">NON PUBLIÉ</span>
+            </p>
+          </div>
+          <div>
+            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Numéro Matricule :</strong> <span style="color: #1560bd; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.matricule || '-' }}</span></p>
+            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Classe & Niveau :</strong> <span style="color: #0f172a; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.classes && selectedBulletin().student.classes.length > 0 ? selectedBulletin().student.classes[0].nom_classe : 'Non assigné' }} ({{ selectedBulletin().student.classes && selectedBulletin().student.classes.length > 0 ? selectedBulletin().student.classes[0].niveau : '-' }})</span></p>
+          </div>
+        </div>
+
+        <!-- Grades Table -->
+        <table class="custom-table" style="border: 1px solid #e2e8f0; margin-bottom: 2rem;">
+          <thead>
+            <tr style="background-color: #f8fafc;">
+              <th style="border: 1px solid #e2e8f0; padding: 0.75rem 1rem;">Matière</th>
+              <th style="border: 1px solid #e2e8f0; text-align: center; width: 100px; padding: 0.75rem 1rem;">Coefficient</th>
+              <th style="border: 1px solid #e2e8f0; text-align: center; width: 100px; padding: 0.75rem 1rem;">Note /20</th>
+              <th style="border: 1px solid #e2e8f0; text-align: center; width: 120px; padding: 0.75rem 1rem;">Note Pondérée</th>
+              <th style="border: 1px solid #e2e8f0; padding: 0.75rem 1rem;">Enseignant</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let n of selectedBulletin().notes">
+              <td style="border: 1px solid #e2e8f0; font-weight: 600; padding: 0.85rem 1rem;">{{ n.nom_matiere }}</td>
+              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #475569; padding: 0.85rem 1rem;">{{ n.coefficient }}</td>
+              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0f172a; padding: 0.85rem 1rem;">{{ n.valeur_note }}</td>
+              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #1560bd; padding: 0.85rem 1rem;">{{ (n.valeur_note * n.coefficient).toFixed(2) }}</td>
+              <td style="border: 1px solid #e2e8f0; color: #475569; padding: 0.85rem 1rem;">{{ n.prof_name || 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Summary & Decision Block -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+          <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background-color: #f8fafc;">
+            <h5 style="margin: 0 0 0.75rem 0; font-weight: 700; color: #1e293b;">Résultats Globaux</h5>
+            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Moyenne Générale : <strong style="color: #1560bd; font-size: 1.1rem; margin-left: 0.25rem;">{{ selectedBulletin().moyenneG.toFixed(2) }} / 20</strong></p>
+            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Mention obtenue : <span class="badge-level" style="margin-left: 0.25rem; background-color: #e8f0fe; color: #1560bd; font-weight: 700;">{{ selectedBulletin().mention }}</span></p>
+          </div>
+
+          <div style="text-align: right; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 0.5rem;">
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Fait à Nouakchott, le {{ todayStr }}</p>
+            <p style="font-weight: 700; color: #1e293b; margin: 0.5rem 0 0 0; text-decoration: underline;">La Direction des Études</p>
+            <div style="height: 65px; width: 130px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.65rem; text-transform: uppercase;">Cachet Officiel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Panel for modal -->
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem; margin-top: 1.5rem;">
+        <button (click)="closeBulletin()" class="btn-primary-custom" style="width: auto; background: #64748b; padding: 0.6rem 1.5rem; box-shadow: none;">Fermer</button>
+        
+        <!-- Toggle Publish Button -->
+        <button 
+          (click)="togglePublishBulletin()" 
+          class="btn-primary-custom no-print" 
+          [style.background]="(selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true) ? '#ef4444' : '#10b981'"
+          [style.boxShadow]="(selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true) ? '0 4px 12px rgba(239, 68, 68, 0.2)' : '0 4px 12px rgba(16, 185, 129, 0.2)'"
+          style="width: auto; padding: 0.6rem 1.5rem;"
+        >
+          <span *ngIf="selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true">
+            <i class="fa-solid fa-eye-slash me-2"></i> Retirer la publication
+          </span>
+          <span *ngIf="selectedBulletin().student.bulletin_publie !== 1 && selectedBulletin().student.bulletin_publie !== true">
+            <i class="fa-solid fa-eye me-2"></i> Publier le bulletin
+          </span>
+        </button>
+
+        <button (click)="printBulletin()" class="btn-primary-custom" style="width: auto; padding: 0.6rem 1.5rem;"><i class="fa-solid fa-print me-2"></i> Imprimer le bulletin</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Notification Toast -->
   <div *ngIf="message()" class="custom-toast">
