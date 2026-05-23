@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -35,45 +35,34 @@ export class DashboardComponent implements OnInit {
     return allStudents.filter(s => s.classes && s.classes.length > 0 && s.classes[0].id.toString() === classId.toString());
   });
 
-  // Matières filtrées dynamiquement selon la filière de la classe sélectionnée
+  selectedTeacherClasseIds = signal<string[]>([]);
+
+  // Matières filtrées dynamiquement pour le formTeacher
   filteredMatieres = computed(() => {
-    const classId = this.selectedTeacherClasseId();
-    if (!classId) return [];
+    const classIds = this.selectedTeacherClasseIds();
+    if (!classIds || classIds.length === 0) return [];
     
-    const selectedClass = this.classes().find(c => c.id.toString() === classId.toString());
-    if (!selectedClass) return [];
+    const selectedClasses = this.classes().filter(c => classIds.includes(c.id.toString()) || classIds.includes(c.id));
+    if (selectedClasses.length === 0) return [];
 
-    const nom = selectedClass.nom_classe.toUpperCase();
-    let filiere = '';
-    
-    // Détection de la filière
-    if (nom.includes('IG')) filiere = 'IG';
-    else if (nom.includes('FC')) filiere = 'FC';
-    else if (nom.includes('GRH')) filiere = 'GRH';
-    else if (nom.includes('BA')) filiere = 'BA';
-    else if (nom.includes('DI')) filiere = 'DI';
-    else if (nom.includes('RT')) filiere = 'RT';
-    else {
-      // Fallbacks intelligents si le nom contient des mots-clés
-      if (nom.includes('DEV') || nom.includes('DEVELOPPEMENT') || nom.includes('INFO')) filiere = 'DI';
-      else if (nom.includes('FINANCE') || nom.includes('COMPTA')) filiere = 'FC';
-      else if (nom.includes('RESEAU') || nom.includes('TELECOM')) filiere = 'RT';
-      else if (nom.includes('RESSOURCES') || nom.includes('HUMAIN')) filiere = 'GRH';
-      else filiere = nom;
-    }
-
-    return this.matieres().filter(m => m.filiere === filiere);
+    return this.matieres().filter(m => 
+      selectedClasses.some(c => m.filiere === c.nom_classe && (!m.niveau || m.niveau === c.niveau))
+    );
   });
 
   onClasseChange(val: any) {
-    this.selectedTeacherClasseId.set(val);
-    this.formTeacher.matiere_id = ''; // Réinitialise la matière
+    this.formTeacher.matiere_ids = [];
   }
 
   // Bulletin sélectionné
   selectedBulletin = signal<any | null>(null);
   showBulletinModal = signal<boolean>(false);
   todayStr = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  
+  // Custom Dropdown States
+  isClassesDropdownOpen = signal<boolean>(false);
+  isMatieresDropdownOpen = signal<boolean>(false);
+
   
   // Données du formulaire de Classe
   formClasse = { 
@@ -113,9 +102,9 @@ export class DashboardComponent implements OnInit {
     id: null as number | null,
     name: '',
     email: '',
-    classe_id: '',
-    matiere_id: '',
-    password: '' // Optionnel, généré automatiquement si vide
+    password: '',
+    classe_ids: [] as string[],
+    matiere_ids: [] as string[]
   };
 
   private baseUrl = 'http://localhost:8000/api';
@@ -217,6 +206,9 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.refreshClasses();
         this.showNotification('Classe ajoutée !');
+      },
+      error: (err) => {
+        this.showNotification(err.error?.message || 'Erreur lors de l\'ajout de la classe.');
       }
     });
   }
@@ -351,8 +343,8 @@ export class DashboardComponent implements OnInit {
     const payload: any = {
       name: this.formTeacher.name,
       role: 'enseignant',
-      classe_id: this.formTeacher.classe_id ? parseInt(this.formTeacher.classe_id) : null,
-      matiere_id: this.formTeacher.matiere_id ? parseInt(this.formTeacher.matiere_id) : null
+      classe_ids: this.formTeacher.classe_ids.map(id => parseInt(id)),
+      matiere_ids: this.formTeacher.matiere_ids.map(id => parseInt(id))
     };
 
     if (this.formTeacher.id) {
@@ -382,11 +374,19 @@ export class DashboardComponent implements OnInit {
     this.formTeacher.id = teacher.id;
     this.formTeacher.name = teacher.name;
     this.formTeacher.email = teacher.email;
-    const classId = teacher.affectations && teacher.affectations.length > 0 ? teacher.affectations[0].classe_id.toString() : '';
-    this.formTeacher.classe_id = classId;
-    this.selectedTeacherClasseId.set(classId); // Mettre à jour le signal réactif
-    this.formTeacher.matiere_id = teacher.affectations && teacher.affectations.length > 0 ? teacher.affectations[0].matiere_id.toString() : '';
     this.formTeacher.password = ''; // Laisse vide si pas de changement
+    
+    if (teacher.affectations && teacher.affectations.length > 0) {
+      const cIds = Array.from(new Set(teacher.affectations.map((a: any) => a.classe_id.toString())));
+      const mIds = Array.from(new Set(teacher.affectations.map((a: any) => a.matiere_id.toString())));
+      this.formTeacher.classe_ids = cIds as string[];
+      this.selectedTeacherClasseIds.set(cIds as string[]);
+      this.formTeacher.matiere_ids = mIds as string[];
+    } else {
+      this.formTeacher.classe_ids = [];
+      this.selectedTeacherClasseIds.set([]);
+      this.formTeacher.matiere_ids = [];
+    }
   }
 
   deleteTeacher(id: number) {
@@ -403,11 +403,94 @@ export class DashboardComponent implements OnInit {
       id: null,
       name: '',
       email: '',
-      classe_id: '',
-      matiere_id: '',
-      password: ''
+      password: '',
+      classe_ids: [],
+      matiere_ids: []
     };
-    this.selectedTeacherClasseId.set(''); // Réinitialiser le signal réactif
+    this.selectedTeacherClasseIds.set([]);
+  }
+
+  // --- CUSTOM MULTI-SELECT DROPDOWN LOGIC ---
+  toggleClassesDropdown() {
+    this.isClassesDropdownOpen.set(!this.isClassesDropdownOpen());
+    if (this.isClassesDropdownOpen()) this.isMatieresDropdownOpen.set(false);
+  }
+
+  toggleMatieresDropdown() {
+    this.isMatieresDropdownOpen.set(!this.isMatieresDropdownOpen());
+    if (this.isMatieresDropdownOpen()) this.isClassesDropdownOpen.set(false);
+  }
+
+  onClasseCheckboxChange(id: number, event: any) {
+    const isChecked = event.target.checked;
+    let currentIds = [...this.formTeacher.classe_ids];
+    
+    if (isChecked) {
+      if (!currentIds.includes(id.toString())) currentIds.push(id.toString());
+    } else {
+      currentIds = currentIds.filter(cId => cId !== id.toString());
+    }
+    
+    this.formTeacher.classe_ids = currentIds;
+    this.selectedTeacherClasseIds.set(currentIds);
+    this.onClasseChange(null);
+  }
+
+  onMatiereCheckboxChange(id: number, event: any) {
+    const isChecked = event.target.checked;
+    let currentIds = [...this.formTeacher.matiere_ids];
+    
+    if (isChecked) {
+      if (!currentIds.includes(id.toString())) currentIds.push(id.toString());
+    } else {
+      currentIds = currentIds.filter(mId => mId !== id.toString());
+    }
+    
+    this.formTeacher.matiere_ids = currentIds;
+  }
+
+  getSelectedClassesText(): string {
+     if (!this.formTeacher.classe_ids || this.formTeacher.classe_ids.length === 0) return "-- Choisir une ou plusieurs classes --";
+     const selected = this.classes().filter(c => this.formTeacher.classe_ids.includes(c.id.toString()));
+     return selected.map(c => `${c.nom_classe} (${c.niveau})`).join(', ');
+  }
+
+  getSelectedMatieresText(): string {
+     if (!this.formTeacher.matiere_ids || this.formTeacher.matiere_ids.length === 0) return "-- Choisir une ou plusieurs matières --";
+     const selected = this.matieres().filter(m => this.formTeacher.matiere_ids.includes(m.id.toString()));
+     return selected.map(m => `${m.nom_matiere} (${m.filiere} ${m.niveau})`).join(', ');
+  }
+
+  getTeacherUniqueClasses(teacher: any): any[] {
+    if (!teacher.affectations) return [];
+    const classesMap = new Map();
+    teacher.affectations.forEach((a: any) => {
+      if (a.classe && !classesMap.has(a.classe.id)) {
+        classesMap.set(a.classe.id, a.classe);
+      }
+    });
+    return Array.from(classesMap.values());
+  }
+
+  getTeacherUniqueMatieres(teacher: any): any[] {
+    if (!teacher.affectations) return [];
+    const matieresMap = new Map();
+    teacher.affectations.forEach((a: any) => {
+      if (a.matiere && !matieresMap.has(a.matiere.id)) {
+        matieresMap.set(a.matiere.id, a.matiere);
+      }
+    });
+    return Array.from(matieresMap.values());
+  }
+
+  // Close dropdowns when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-multi-select')) {
+      this.isClassesDropdownOpen.set(false);
+      this.isMatieresDropdownOpen.set(false);
+    }
   }
 
   // --- BULLETINS ---

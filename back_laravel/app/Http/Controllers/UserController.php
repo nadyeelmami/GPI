@@ -154,19 +154,27 @@ class UserController extends Controller
 
         $user = User::create($userData);
 
-        if ($request->role === 'etudiant' && $request->filled('classe_id')) {
-            $user->classes()->sync([$request->classe_id]);
+        if ($request->role === 'etudiant') {
+            if ($request->filled('classe_id')) {
+                $user->classes()->attach($request->classe_id);
+            }
+        } else if ($request->role === 'enseignant') {
+            if ($request->filled('classe_ids') && $request->filled('matiere_ids')) {
+                $classe_ids = is_array($request->classe_ids) ? $request->classe_ids : [$request->classe_ids];
+                $matiere_ids = is_array($request->matiere_ids) ? $request->matiere_ids : [$request->matiere_ids];
+                foreach ($classe_ids as $cid) {
+                    foreach ($matiere_ids as $mid) {
+                        Affectation::where('classe_id', $cid)->where('matiere_id', $mid)->delete();
+                        Affectation::create([
+                            'user_id' => $user->id,
+                            'classe_id' => $cid,
+                            'matiere_id' => $mid,
+                        ]);
+                    }
+                }
+            }
         }
 
-        if ($request->role === 'enseignant' && $request->filled('classe_id') && $request->filled('matiere_id')) {
-            Affectation::create([
-                'user_id' => $user->id,
-                'classe_id' => $request->classe_id,
-                'matiere_id' => $request->matiere_id,
-            ]);
-        }
-
-        // Load the relations for the response
         $user->load(['classes', 'affectations.classe', 'affectations.matiere']);
 
         return response()->json([
@@ -308,8 +316,8 @@ class UserController extends Controller
             'password' => 'nullable|string|min:4',
             'role' => 'required|string|in:etudiant,enseignant,admin',
             'matricule' => 'nullable|string|max:191|unique:users,matricule,' . $id,
-            'classe_id' => 'nullable|integer|exists:classes,id',
-            'matiere_id' => 'nullable|integer|exists:matieres,id',
+            'classe_ids' => 'nullable|array',
+            'matiere_ids' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -336,16 +344,23 @@ class UserController extends Controller
         } else if ($request->role === 'enseignant') {
             // Remove student class associations
             $user->classes()->detach();
-
-            if ($request->filled('classe_id') && $request->filled('matiere_id')) {
-                // Delete previous affectation(s) to match the single assignment logic of the UI form
+            
+            if ($request->filled('classe_ids') && $request->filled('matiere_ids')) {
                 Affectation::where('user_id', $user->id)->delete();
-                Affectation::create([
-                    'user_id' => $user->id,
-                    'classe_id' => $request->classe_id,
-                    'matiere_id' => $request->matiere_id,
-                ]);
-            } else {
+                $classe_ids = is_array($request->classe_ids) ? $request->classe_ids : [$request->classe_ids];
+                $matiere_ids = is_array($request->matiere_ids) ? $request->matiere_ids : [$request->matiere_ids];
+                foreach ($classe_ids as $cid) {
+                    foreach ($matiere_ids as $mid) {
+                        Affectation::where('classe_id', $cid)->where('matiere_id', $mid)->delete();
+                        Affectation::create([
+                            'user_id' => $user->id,
+                            'classe_id' => $cid,
+                            'matiere_id' => $mid,
+                        ]);
+                    }
+                }
+            } else if ($request->has('classe_ids')) {
+                // If they explicitly clear it or send empty
                 Affectation::where('user_id', $user->id)->delete();
             }
         } else {
@@ -512,5 +527,82 @@ class UserController extends Controller
             'message' => $publish ? 'Bulletin publié avec succès !' : 'Publication du bulletin annulée.',
             'bulletin_publie' => $student->bulletin_publie
         ], 200);
+    }
+
+    /**
+     * Update the password for a specific user.
+     */
+    public function updatePassword(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur introuvable'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:4'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json(['message' => 'Mot de passe mis à jour avec succès'], 200);
+    }
+
+    /**
+     * Add an affectation to a teacher.
+     */
+    public function addAffectation(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user || $user->role !== 'enseignant') {
+            return response()->json(['message' => 'Enseignant introuvable'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'classe_id' => 'required|integer|exists:classes,id',
+            'matiere_id' => 'required|integer|exists:matieres,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Check if already assigned
+        $exists = Affectation::where('user_id', $user->id)
+            ->where('classe_id', $request->classe_id)
+            ->where('matiere_id', $request->matiere_id)
+            ->first();
+
+        if ($exists) {
+            return response()->json(['message' => 'Cette affectation existe déjà pour ce professeur'], 422);
+        }
+
+        Affectation::create([
+            'user_id' => $user->id,
+            'classe_id' => $request->classe_id,
+            'matiere_id' => $request->matiere_id,
+        ]);
+
+        return response()->json(['message' => 'Affectation ajoutée avec succès'], 200);
+    }
+
+    /**
+     * Remove an affectation from a teacher.
+     */
+    public function removeAffectation($id)
+    {
+        $affectation = Affectation::find($id);
+        if (!$affectation) {
+            return response()->json(['message' => 'Affectation introuvable'], 404);
+        }
+
+        $affectation->delete();
+
+        return response()->json(['message' => 'Affectation supprimée avec succès'], 200);
     }
 }

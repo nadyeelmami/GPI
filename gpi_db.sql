@@ -73,6 +73,7 @@ CREATE TABLE `matieres` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `nom_matiere` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Algorithmique"
   `coefficient` int(11) NOT NULL DEFAULT 1,
+  `niveau` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `filiere` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL

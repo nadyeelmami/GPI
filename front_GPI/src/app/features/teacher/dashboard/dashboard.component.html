@@ -1,124 +1,203 @@
 <div class="dashboard-container">
-  
+
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div>
+  <aside class="sidebar" [class.closed]="!isSidebarOpen()">
+    <div class="sidebar-top">
       <div class="brand-section">
-        <h4 class="brand-logo">ISCAE PROF</h4>
+        <div class="logo-wrapper">
+          <img src="logo.png" alt="ISCAE Logo">
+        </div>
+        <h4 class="brand-logo">ISCAE <span>PROF</span></h4>
         <p class="brand-subtitle">Saisie des Notes</p>
       </div>
 
       <nav class="menu-section">
-        <a class="menu-link active" href="#" (click)="$event.preventDefault();">
-          <i class="fa-solid fa-chalkboard-user"></i>
-          <span>Mes Classes & Notes</span>
-        </a>
+        <div class="menu-title">Mes Classes & Matières</div>
+
+        <ng-container *ngIf="affectations().length > 0; else noAffectationsMenu">
+          <a *ngFor="let aff of affectations()"
+             class="menu-link"
+             [class.active]="affectation()?.classe_id === aff.classe_id && affectation()?.matiere_id === aff.matiere_id"
+             href="javascript:void(0)"
+             (click)="selectAffectation(aff)">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <span class="text-truncate menu-link-text">
+              {{ aff.classe.nom_classe }} - {{ aff.matiere.nom_matiere }}
+            </span>
+          </a>
+        </ng-container>
+
+        <ng-template #noAffectationsMenu>
+          <div class="empty-menu-message">
+            Aucune classe
+          </div>
+        </ng-template>
       </nav>
     </div>
 
     <!-- User profile at the bottom of sidebar -->
     <div class="user-profile-card" *ngIf="teacherUser()">
       <div class="avatar">{{ teacherUser().name.substring(0, 2).toUpperCase() }}</div>
+
       <div class="user-info">
         <span class="user-name">{{ teacherUser().name }}</span>
         <span class="user-role">Enseignant</span>
       </div>
-      <button (click)="logout()" class="logout-btn" title="Se déconnecter">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-      </button>
+
+      <div class="user-actions">
+        <button (click)="openPasswordModal()" class="action-btn" title="Modifier Mot de Passe">
+          <i class="fa-solid fa-key"></i>
+        </button>
+
+        <button (click)="logout()" class="action-btn logout-btn" title="Se déconnecter">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
     </div>
   </aside>
 
   <!-- Main Content -->
   <main class="main-content">
     <header class="header-container" *ngIf="teacherUser()">
-      <div class="header-title">
-        <h2>Espace Enseignant - ISCAE</h2>
-        <p>Gérez et publiez les notes pour vos matières affectées.</p>
+      <div class="header-left">
+        <button class="menu-toggle-btn" (click)="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="header-title">
+          <h2>Espace Enseignant</h2>
+          <p>Bienvenue à l'ISCAE. Gérez et publiez les notes de vos matières.</p>
+        </div>
       </div>
     </header>
 
     <!-- Loading State -->
-    <div *ngIf="isLoading()" style="display: flex; justify-content: center; align-items: center; height: 300px;">
-      <div style="font-weight: 600; color: #64748b; font-size: 1.1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <i class="fa-solid fa-circle-notch fa-spin text-primary" style="font-size: 1.5rem;"></i>
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="loading-content">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
         <span>Chargement des données...</span>
       </div>
     </div>
 
     <ng-container *ngIf="!isLoading()">
-      <!-- No Affectation Assigned -->
-      <div *ngIf="!affectation()" class="custom-card" style="padding: 3rem; text-align: center; max-width: 600px; margin: 4rem auto;">
-        <div style="font-size: 3.5rem; color: #cbd5e1; margin-bottom: 1.5rem;">
-          <i class="fa-solid fa-circle-exclamation text-warning"></i>
+
+      <!-- Stats Grid -->
+      <div *ngIf="affectation()" class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-details">
+            <h4>{{ studentsGrades().length }}</h4>
+            <span>Étudiants Inscrits</span>
+          </div>
+          <div class="stat-icon-wrapper icon-blue">
+            <i class="fa-solid fa-user-group"></i>
+          </div>
         </div>
-        <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Aucune affectation trouvée</h4>
-        <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
-          Vous n'avez pas encore été affecté à une classe ou une matière par l'administration. 
-          Veuillez contacter le bureau d'administration de l'ISCAE pour finaliser votre affectation.
+
+        <div class="stat-card">
+          <div class="stat-details">
+            <h4 class="text-truncate">{{ affectation().classe.nom_classe }}</h4>
+            <span>Niveau {{ affectation().classe.niveau }}</span>
+          </div>
+          <div class="stat-icon-wrapper icon-green">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-details">
+            <h4>{{ isPublished() ? 'Publié' : 'En Saisie' }}</h4>
+            <span>Statut des notes</span>
+          </div>
+          <div class="stat-icon-wrapper" [ngClass]="isPublished() ? 'icon-success' : 'icon-warning'">
+            <i class="fa-solid" [ngClass]="isPublished() ? 'fa-lock' : 'fa-pen'"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Affectation Assigned -->
+      <div *ngIf="!affectation()" class="custom-card empty-state-card">
+        <div class="empty-state-icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+
+        <h4>Aucune affectation trouvée</h4>
+
+        <p>
+          Vous n'avez pas encore été affecté à une classe ou une matière par l'administration.
+          Veuillez contacter le bureau d'administration pour finaliser votre dossier.
         </p>
-        <button (click)="logout()" class="btn-primary-custom" style="width: auto; margin-top: 1.5rem; padding: 0.75rem 2rem;">
+
+        <button (click)="logout()" class="btn-primary-custom btn-auto">
+          <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>
           Se Déconnecter
         </button>
       </div>
 
       <!-- Active Grading Panel -->
-      <div *ngIf="affectation()" class="dashboard-grid" style="grid-template-columns: 1fr;">
+      <div *ngIf="affectation()" class="grading-panel">
         <div class="custom-card">
+
           <!-- Course Details Header -->
-          <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background-color: #faf5ff; border-bottom: 1px solid #f3e8ff;">
-            <div>
-              <span class="badge-level" style="background-color: #7c3aed; color: #ffffff; padding: 0.35rem 1rem; font-weight: 700; text-transform: uppercase;">
+          <div class="card-header-custom grading-header">
+            <div class="header-info">
+              <span class="badge-filiere" [ngClass]="affectation().classe.nom_classe.toLowerCase()">
+                <span class="dot"></span>
                 {{ affectation().classe.nom_classe }} ({{ affectation().classe.niveau }})
               </span>
-              <h4 style="font-weight: 800; color: #1e1b4b; margin: 0.5rem 0 0 0; font-size: 1.35rem;">
-                Matière : {{ affectation().matiere.nom_matiere }}
-              </h4>
+
+              <h5>
+                Matière :
+                <strong>{{ affectation().matiere.nom_matiere }}</strong>
+                <span class="coefficient-badge">Coeff: {{ affectation().matiere.coefficient }}</span>
+              </h5>
             </div>
-            
-            <div style="display: flex; gap: 0.75rem; align-items: center;">
-              <span *ngIf="isPublished()" class="badge-level" style="background-color: #f0fdf4; color: #16a34a; font-weight: 700; border: 1px solid #bbf7d0; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
-                <i class="fa-solid fa-circle-check"></i> NOTES PUBLIÉES (ADMIN-OK)
+
+            <div class="header-status">
+              <span *ngIf="isPublished()" class="status-badge published">
+                <i class="fa-solid fa-circle-check me-1"></i>
+                NOTES PUBLIÉES
               </span>
-              <span *ngIf="!isPublished()" class="badge-level" style="background-color: #fffbeb; color: #d97706; font-weight: 700; border: 1px solid #fef3c7; display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
-                <i class="fa-solid fa-clock"></i> SAISIE EN COURS (MODIFIABLE)
+
+              <span *ngIf="!isPublished()" class="status-badge draft">
+                <i class="fa-solid fa-clock me-1"></i>
+                SAISIE EN COURS
               </span>
             </div>
           </div>
 
           <!-- Alert Note if Published -->
-          <div *ngIf="isPublished()" style="background-color: #f0fdf4; border-bottom: 1px solid #bbf7d0; color: #15803d; padding: 1rem 1.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 0.75rem;">
-            <i class="fa-solid fa-circle-info" style="font-size: 1.1rem;"></i>
-            <span>
-              <strong>Information :</strong> Les notes de cette classe ont été publiées officiellement. 
-              Par mesure de sécurité, elles sont verrouillées et ne peuvent plus être éditées.
-            </span>
+          <div *ngIf="isPublished()" class="info-alert">
+            <i class="fa-solid fa-circle-info"></i>
+            <p>
+              <strong>Information :</strong>
+              Les notes ont été publiées officiellement. Elles sont désormais verrouillées et ne peuvent plus être éditées.
+            </p>
           </div>
 
-          <div class="card-body-custom" style="padding: 0;">
+          <div class="card-body-table">
             <div class="table-responsive">
               <table class="custom-table">
                 <thead>
                   <tr>
-                    <th style="width: 140px;">Matricule</th>
+                    <th>Matricule</th>
                     <th>Nom de l'étudiant</th>
                     <th>Email</th>
-                    <th style="width: 180px;">Type Évaluation</th>
-                    <th style="text-align: center; width: 140px;">Note (/20)</th>
-                    <th style="text-align: center; width: 150px;">Statut</th>
+                    <th>Type Évaluation</th>
+                    <th class="text-center">Note (/20)</th>
+                    <th class="text-center">Statut</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   <tr *ngFor="let s of studentsGrades(); let i = index">
-                    <td style="font-weight: 600; color: #0284c7;">{{ s.matricule || '-' }}</td>
-                    <td style="font-weight: 700; color: #0f172a;">{{ s.name }}</td>
-                    <td style="color: #64748b; font-size: 0.85rem;">{{ s.email }}</td>
+                    <td class="td-matricule">{{ s.matricule || '-' }}</td>
+                    <td class="td-name">{{ s.name }}</td>
+                    <td class="td-email">{{ s.email }}</td>
                     <td>
-                      <select 
-                        [(ngModel)]="s.type_evaluation" 
-                        class="form-control-custom" 
-                        style="padding: 0.4rem 0.75rem; font-size: 0.85rem;"
-                        [disabled]="s.statut_validation === 1"
+                      <select
+                        [(ngModel)]="s.type_evaluation"
+                        class="form-control-custom table-select"
+                        [disabled]="s.statut_validation === 1 || isPublished()"
                       >
                         <option value="Examen">Examen</option>
                         <option value="CC1">CC1</option>
@@ -127,44 +206,46 @@
                         <option value="TP">TP</option>
                       </select>
                     </td>
-                    <td style="text-align: center;">
-                      <input 
-                        type="number" 
-                        [(ngModel)]="s.valeur_note" 
-                        min="0" 
-                        max="20" 
+                    <td class="text-center">
+                      <input
+                        type="number"
+                        [(ngModel)]="s.valeur_note"
+                        min="0"
+                        max="20"
                         step="0.25"
-                        class="form-control-custom" 
-                        style="text-align: center; font-weight: 800; font-size: 1.05rem; width: 90px; margin: 0 auto; color: #0284c7;"
+                        class="form-control-custom note-input"
                         placeholder="--"
-                        [disabled]="s.statut_validation === 1"
+                        [disabled]="s.statut_validation === 1 || isPublished()"
                       >
                     </td>
-                    <td style="text-align: center;">
-                      <span *ngIf="s.statut_validation === 1" class="badge-level" style="background-color: #e6fcf5; color: #0ca678;">
-                        Publiée
-                      </span>
-                      <span *ngIf="s.statut_validation === 0" class="badge-level" style="background-color: #f1f3f5; color: #868e96;">
-                        Brouillon
+                    <td class="text-center">
+                      <span class="badge-level-premium" [ngStyle]="{'background-color': s.statut_validation === 1 ? '#e6fcf5' : '#f1f5f9', 'color': s.statut_validation === 1 ? '#0ca678' : '#64748b'}">
+                        {{ s.statut_validation === 1 ? 'Publiée' : 'Brouillon' }}
                       </span>
                     </td>
                   </tr>
+
+                  <!-- Empty Table State -->
                   <tr *ngIf="studentsGrades().length === 0">
-                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 3rem;">
-                      Aucun étudiant inscrit dans cette classe pour le moment.
+                    <td colspan="6" class="table-empty-msg">
+                      <i class="fa-solid fa-inbox"></i>
+                      Aucun étudiant inscrit dans cette classe.
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            
+
             <!-- Actions Buttons -->
-            <div *ngIf="studentsGrades().length > 0 && !isPublished()" style="padding: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #f1f5f9; background-color: #f8fafc;">
-              <button (click)="saveDraft()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; background: #64748b; box-shadow: none; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-floppy-disk"></i> Enregistrer Brouillon
+            <div *ngIf="studentsGrades().length > 0 && !isPublished()" class="actions-footer">
+              <button (click)="saveDraft()" class="btn-secondary-custom">
+                <i class="fa-solid fa-floppy-disk me-2"></i>
+                Enregistrer Brouillon
               </button>
-              <button (click)="publishNotes()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-paper-plane"></i> Publier les notes
+
+              <button (click)="publishNotes()" class="btn-primary-custom btn-auto">
+                <i class="fa-solid fa-paper-plane me-2"></i>
+                Publier les notes définitivement
               </button>
             </div>
           </div>
@@ -174,8 +255,47 @@
   </main>
 
   <!-- Notification Toast -->
-  <div *ngIf="message()" class="custom-toast">
-    <i class="fa-solid fa-circle-info text-info"></i>
+  <div *ngIf="message()" class="custom-toast" [class.show]="message()">
+    <i class="fa-solid fa-circle-info"></i>
     <span>{{ message() }}</span>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div *ngIf="isPasswordModalOpen()" class="modal-backdrop" (click)="closePasswordModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header-premium">
+        <div class="modal-title-wrapper">
+          <div class="modal-icon">
+            <i class="fa-solid fa-key"></i>
+          </div>
+
+          <div>
+            <h3>Modifier le mot de passe</h3>
+            <p>Saisissez votre nouveau mot de passe</p>
+          </div>
+        </div>
+
+        <button class="close-btn-premium" (click)="closePasswordModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-premium">
+        <div class="mb-0">
+          <label class="form-label-custom">Nouveau mot de passe</label>
+          <input
+            type="password"
+            [(ngModel)]="newPassword"
+            class="form-control-custom"
+            placeholder="Minimum 4 caractères"
+          >
+        </div>
+      </div>
+
+      <div class="modal-footer-premium">
+        <button class="btn-cancel-premium" (click)="closePasswordModal()">Annuler</button>
+        <button class="btn-primary-custom btn-auto" (click)="updatePassword()">Enregistrer</button>
+      </div>
+    </div>
   </div>
 </div>

@@ -31,6 +31,17 @@ class ClasseController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // S'assurer que la classe n'existe pas déjà pour ce niveau
+        $exists = Classe::where('nom_classe', $request->nom_classe)
+            ->where('niveau', $request->niveau)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Cette classe existe déjà pour ce niveau.'
+            ], 422);
+        }
+
         $classe = Classe::create($request->all());
 
         return response()->json([

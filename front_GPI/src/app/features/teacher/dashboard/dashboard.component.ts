@@ -14,10 +14,14 @@ import { Router } from '@angular/router';
 export class DashboardComponent implements OnInit {
   // State signals
   teacherUser = signal<any>(null);
+  affectations = signal<any[]>([]);
   affectation = signal<any>(null);
   studentsGrades = signal<any[]>([]);
   message = signal<string | null>(null);
   isLoading = signal<boolean>(true);
+  isSidebarOpen = signal<boolean>(true);
+  isPasswordModalOpen = signal<boolean>(false);
+  newPassword = signal<string>('');
 
   private baseUrl = 'http://localhost:8000/api';
 
@@ -44,12 +48,13 @@ export class DashboardComponent implements OnInit {
     this.http.get<any>(`${this.baseUrl}/users/${teacherId}`).subscribe({
       next: (res) => {
         this.teacherUser.set(res);
-        const aff = res.affectations && res.affectations.length > 0 ? res.affectations[0] : null;
-        this.affectation.set(aff);
-
-        if (aff) {
-          this.loadStudentsGrades(aff.classe_id, aff.matiere_id);
+        if (res.affectations && res.affectations.length > 0) {
+          this.affectations.set(res.affectations);
+          this.affectation.set(res.affectations[0]);
+          this.loadStudentsGrades(res.affectations[0].classe_id, res.affectations[0].matiere_id);
         } else {
+          this.affectations.set([]);
+          this.affectation.set(null);
           this.isLoading.set(false);
         }
       },
@@ -79,6 +84,15 @@ export class DashboardComponent implements OnInit {
     if (list.length === 0) return false;
     return list.some(g => g.statut_validation === 1);
   });
+
+  selectAffectation(aff: any) {
+    this.affectation.set(aff);
+    this.isLoading.set(true);
+    this.loadStudentsGrades(aff.classe_id, aff.matiere_id);
+    if (window.innerWidth < 768) {
+      this.isSidebarOpen.set(false);
+    }
+  }
 
   saveDraft() {
     const aff = this.affectation();
@@ -159,5 +173,38 @@ export class DashboardComponent implements OnInit {
   logout() {
     localStorage.clear();
     this.router.navigate(['/login']);
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.set(!this.isSidebarOpen());
+  }
+
+  openPasswordModal() {
+    this.newPassword.set('');
+    this.isPasswordModalOpen.set(true);
+  }
+
+  closePasswordModal() {
+    this.isPasswordModalOpen.set(false);
+  }
+
+  updatePassword() {
+    const teacher = this.teacherUser();
+    if (!teacher) return;
+    
+    if (this.newPassword().length < 4) {
+      this.showNotification('Le mot de passe doit contenir au moins 4 caractères.');
+      return;
+    }
+
+    this.http.put(`${this.baseUrl}/users/${teacher.id}/password`, { password: this.newPassword() }).subscribe({
+      next: (res: any) => {
+        this.showNotification(res.message || 'Mot de passe mis à jour.');
+        this.closePasswordModal();
+      },
+      error: (err) => {
+        this.showNotification(err.error?.message || 'Erreur lors de la mise à jour.');
+      }
+    });
   }
 }

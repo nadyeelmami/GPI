@@ -236,12 +236,14 @@
                        </span>
                      </td>
                      <td style="text-align: right; padding-right: 1.5rem;">
-                       <button (click)="editMatiere(m)" class="action-btn-edit-premium" style="margin-right: 0.25rem;" title="Modifier la matière">
-                         <i class="fa-solid fa-pen-to-square"></i>
-                       </button>
-                       <button (click)="deleteMatiere(m.id)" class="action-btn-delete-premium" title="Supprimer la matière">
-                         <i class="fa-solid fa-trash-can"></i>
-                       </button>
+                       <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center;">
+                         <button (click)="editMatiere(m)" class="action-btn-edit-premium" title="Modifier la matière">
+                           <i class="fa-solid fa-pen-to-square"></i>
+                         </button>
+                         <button (click)="deleteMatiere(m.id)" class="action-btn-delete-premium" title="Supprimer la matière">
+                           <i class="fa-solid fa-trash-can"></i>
+                         </button>
+                       </div>
                      </td>
                    </tr>
                    <tr *ngIf="matieres().length === 0">
@@ -286,9 +288,11 @@
                        <span class="badge-level-premium" [ngClass]="'lvl-' + c.niveau.toLowerCase()">{{ c.niveau }}</span>
                      </td>
                      <td style="text-align: right; padding-right: 1.5rem;">
-                       <button (click)="deleteClasse(c.id)" class="action-btn-delete-premium" title="Supprimer la classe">
-                         <i class="fa-solid fa-trash-can"></i>
-                       </button>
+                       <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center;">
+                         <button (click)="deleteClasse(c.id)" class="action-btn-delete-premium" title="Supprimer la classe">
+                           <i class="fa-solid fa-trash-can"></i>
+                         </button>
+                       </div>
                      </td>
                    </tr>
                    <tr *ngIf="classes().length === 0">
@@ -452,15 +456,17 @@
                     </span>
                   </td>
                   <td style="text-align: right; padding-right: 1.5rem;">
-                    <button (click)="generateBulletin(s.id)" class="action-btn-bulletin" title="Générer le bulletin de notes">
-                      <i class="fa-solid fa-file-invoice"></i>
-                    </button>
-                    <button (click)="editStudent(s)" class="action-btn-edit" title="Modifier l'étudiant">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button (click)="deleteStudent(s.id)" class="action-btn-delete" title="Supprimer l'étudiant">
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center;">
+                      <button (click)="generateBulletin(s.id)" class="action-btn-bulletin" title="Générer le bulletin de notes">
+                        <i class="fa-solid fa-file-invoice"></i>
+                      </button>
+                      <button (click)="editStudent(s)" class="action-btn-edit" title="Modifier l'étudiant">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button (click)="deleteStudent(s.id)" class="action-btn-delete" title="Supprimer l'étudiant">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="students().length === 0">
@@ -477,7 +483,7 @@
       <!-- ================= TEACHERS SECTION ================= -->
       <ng-container *ngIf="activeTab() === 'teachers'">
         <!-- Adding/Editing Teacher Form Card -->
-        <div class="custom-card" style="grid-column: 1 / -1;">
+        <div class="custom-card" style="grid-column: 1 / -1; overflow: visible; z-index: 20;">
           <div class="card-header-custom" >
             <h5 style="color: #000000; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
               <i class="fa-solid fa-chalkboard-user" style="color: #5c99e4;"></i>
@@ -496,21 +502,38 @@
                 >
               </div>
 
-              <div class="mb-0">
-                <label class="form-label-custom">Classe Enseignée</label>
-                <select [(ngModel)]="formTeacher.classe_id" (ngModelChange)="onClasseChange($event)" class="form-control-custom">
-                  <option value="">-- Choisir la classe --</option>
-                  <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
-                </select>
+              <div class="mb-0 custom-multi-select" style="position: relative;">
+                <label class="form-label-custom">Classes Enseignées (Multi-choix)</label>
+                <div class="form-control-custom" (click)="toggleClassesDropdown()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; background-color: #fff; min-height: 46px; height: auto;">
+                  <span style="color: #334155; font-size: 0.9rem; white-space: normal; word-break: break-word; flex: 1; padding-right: 0.5rem;">{{ getSelectedClassesText() }}</span>
+                  <i class="fa-solid fa-chevron-down" style="color: #94a3b8; font-size: 0.8rem; flex-shrink: 0;"></i>
+                </div>
+                
+                <div *ngIf="isClassesDropdownOpen()" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; max-height: 200px; overflow-y: auto; margin-top: 4px; padding: 0.5rem 0;">
+                  <div *ngFor="let c of classes()" style="padding: 0 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.75rem; width: 100%; cursor: pointer; margin: 0; padding: 0.5rem; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                      <input type="checkbox" [checked]="formTeacher.classe_ids.includes(c.id.toString())" (change)="onClasseCheckboxChange(c.id, $event)" style="accent-color: #1560bd; width: 16px; height: 16px;">
+                      <span style="font-size: 0.9rem; color: #1e293b;">{{ c.nom_classe }} ({{ c.niveau }})</span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div class="mb-0">
-                <label class="form-label-custom">Matière Enseignée</label>
-                <select [(ngModel)]="formTeacher.matiere_id" class="form-control-custom">
-                  <option value="">-- Choisir la matière --</option>
-                  <option *ngIf="filteredMatieres().length === 0" value="" disabled>-- Choisir d'abord une classe --</option>
-                  <option *ngFor="let m of filteredMatieres()" [value]="m.id">{{ m.nom_matiere }} (Coeff: {{ m.coefficient }})</option>
-                </select>
+              <div class="mb-0 custom-multi-select" style="position: relative;">
+                <label class="form-label-custom">Matières Enseignées (Multi-choix)</label>
+                <div class="form-control-custom" (click)="filteredMatieres().length > 0 ? toggleMatieresDropdown() : null" [style.cursor]="filteredMatieres().length > 0 ? 'pointer' : 'not-allowed'" [style.opacity]="filteredMatieres().length > 0 ? '1' : '0.6'" style="display: flex; justify-content: space-between; align-items: center; user-select: none; background-color: #fff; min-height: 46px; height: auto;">
+                  <span style="color: #334155; font-size: 0.9rem; white-space: normal; word-break: break-word; flex: 1; padding-right: 0.5rem;">{{ filteredMatieres().length === 0 ? '-- Choisir d\'abord classe(s) --' : getSelectedMatieresText() }}</span>
+                  <i class="fa-solid fa-chevron-down" style="color: #94a3b8; font-size: 0.8rem; flex-shrink: 0;"></i>
+                </div>
+                
+                <div *ngIf="isMatieresDropdownOpen() && filteredMatieres().length > 0" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 50; max-height: 200px; overflow-y: auto; margin-top: 4px; padding: 0.5rem 0;">
+                  <div *ngFor="let m of filteredMatieres()" style="padding: 0 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.75rem; width: 100%; cursor: pointer; margin: 0; padding: 0.5rem; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                      <input type="checkbox" [checked]="formTeacher.matiere_ids.includes(m.id.toString())" (change)="onMatiereCheckboxChange(m.id, $event)" style="accent-color: #7c3aed; width: 16px; height: 16px;">
+                      <span style="font-size: 0.9rem; color: #1e293b;">{{ m.nom_matiere }}</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -536,8 +559,8 @@
                 <tr>
                   <th>Nom complet</th>
                   <th>Email</th>
-                  <th>Classe enseignée</th>
-                  <th>Matière</th>
+                  <th>Classes enseignées</th>
+                  <th>Matières</th>
                   <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
                 </tr>
               </thead>
@@ -546,28 +569,38 @@
                   <td style="font-weight: 600;">{{ t.name }}</td>
                   <td>{{ t.email }}</td>
                   <td>
-                    <span *ngIf="t.affectations && t.affectations.length > 0 && t.affectations[0].classe" class="badge-level" style="background-color: #f0fdf4; color: #16a34a;">
-                      {{ t.affectations[0].classe.nom_classe }} ({{ t.affectations[0].classe.niveau }})
-                    </span>
-                    <span *ngIf="!t.affectations || t.affectations.length === 0 || !t.affectations[0].classe" style="color: #94a3b8; font-size: 0.85rem;">
-                      Aucune assignée
-                    </span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <ng-container *ngIf="t.affectations && t.affectations.length > 0; else noClasse">
+                        <span *ngFor="let aff of t.affectations" class="badge-level" style="background-color: #f0fdf4; color: #16a34a; font-size: 0.75rem; white-space: nowrap; width: fit-content;">
+                          {{ aff.classe.nom_classe }} ({{ aff.classe.niveau }})
+                        </span>
+                      </ng-container>
+                      <ng-template #noClasse>
+                        <span style="color: #94a3b8; font-size: 0.85rem;">Aucune assignée</span>
+                      </ng-template>
+                    </div>
                   </td>
                   <td>
-                    <span *ngIf="t.affectations && t.affectations.length > 0 && t.affectations[0].matiere" class="badge-level" style="background-color: #faf5ff; color: #7c3aed;">
-                      {{ t.affectations[0].matiere.nom_matiere }}
-                    </span>
-                    <span *ngIf="!t.affectations || t.affectations.length === 0 || !t.affectations[0].matiere" style="color: #94a3b8; font-size: 0.85rem;">
-                      Aucune assignée
-                    </span>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <ng-container *ngIf="t.affectations && t.affectations.length > 0; else noMatiere">
+                        <span *ngFor="let aff of t.affectations" class="badge-level" style="background-color: #faf5ff; color: #7c3aed; font-size: 0.75rem; white-space: nowrap; width: fit-content;">
+                          {{ aff.matiere.nom_matiere }}
+                        </span>
+                      </ng-container>
+                      <ng-template #noMatiere>
+                        <span style="color: #94a3b8; font-size: 0.85rem;">Aucune assignée</span>
+                      </ng-template>
+                    </div>
                   </td>
                   <td style="text-align: right; padding-right: 1.5rem;">
-                    <button (click)="editTeacher(t)" class="action-btn-edit" title="Modifier l'enseignant">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button (click)="deleteTeacher(t.id)" class="action-btn-delete" title="Supprimer l'enseignant">
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; align-items: center;">
+                      <button (click)="editTeacher(t)" class="action-btn-edit" title="Modifier l'enseignant">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button (click)="deleteTeacher(t.id)" class="action-btn-delete" title="Supprimer l'enseignant">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="teachers().length === 0">
@@ -791,10 +824,11 @@
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Notification Toast -->
-  <div *ngIf="message()" class="custom-toast">
-    <i class="fa-solid fa-circle-info text-info"></i>
-    <span>{{ message() }}</span>
-  </div>
+
+<!-- Notification Toast -->
+<div *ngIf="message()" class="custom-toast">
+  <i class="fa-solid fa-circle-info text-info"></i>
+  <span>{{ message() }}</span>
 </div>

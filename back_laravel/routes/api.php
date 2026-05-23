@@ -36,8 +36,11 @@ Route::post('/users', [UserController::class, 'store']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 Route::put('/users/{id}', [UserController::class, 'update']);
 Route::delete('/users/{id}', [UserController::class, 'destroy']);
+Route::put('/users/{id}/password', [UserController::class, 'updatePassword']);
 Route::get('/users/{id}/bulletin', [UserController::class, 'bulletin']);
 Route::post('/users/{id}/publish-bulletin', [UserController::class, 'publishBulletin']);
+Route::post('/users/{id}/affectations', [UserController::class, 'addAffectation']);
+Route::delete('/affectations/{id}', [UserController::class, 'removeAffectation']);
 
 Route::get('/notes', [NoteController::class, 'index']);
 Route::post('/notes', [NoteController::class, 'store']);
