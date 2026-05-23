@@ -41,17 +41,24 @@ CREATE TABLE `users` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
+  `matricule` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL UNIQUE,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `role` enum('etudiant','enseignant','admin') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'etudiant',
+  `bulletin_publie` tinyint(1) NOT NULL DEFAULT 0,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-insert into users (name, email, password, role) values
-('ADMIN', 'admin@iscae.mr', '$2y$10$WIRuF4A/j6g1k0G2CJ2xjehoy1ivV8Rm4.Ux3nocPG0LcvQ26xlzW', 'admin'),
-('prof', 'prof@iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'enseignant'),
-('etudiant', 'I12345@etu.iscae.mr', '$2y$10$M2gpYLlIE76V1A3Wf90PNeHuNyx5kTeyEETsaPV/VRx1CQO3DCjom', 'etudiant');
+-- Identifiants de connexion par défaut
+-- Admin      : admin@iscae.mr / adminiscae
+-- Enseignant : med@prof.iscae.mr / mediscae
+-- Étudiant   : I12345@etu.iscae.mr / I12345iscae
+
+insert into users (name, email, matricule, password, role) values
+('ADMIN', 'admin@iscae.mr', NULL, '$2y$10$kC6LzD7/z/w.4kanhbw6aOXVS/ntY0EtzK1RRysRR4Tr4CxR3K896', 'admin'),
+('prof', 'med@prof.iscae.mr', NULL, '$2y$10$Tbbo05FYtl7zzYv9lESIJuo3A/CvxlEn0P376a6oeCYCJgAi8z4ZK', 'enseignant'),
+('etudiant', 'I12345@etu.iscae.mr', 'I12345', '$2y$10$ThYgXRZpCJenPLaG9UfLY.roqJyGu2Eu6pZGsI2BuBK9oeqIqdbTK', 'etudiant');
 
 CREATE TABLE `classes` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -66,6 +73,7 @@ CREATE TABLE `matieres` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `nom_matiere` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Algorithmique"
   `coefficient` int(11) NOT NULL DEFAULT 1,
+  `filiere` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

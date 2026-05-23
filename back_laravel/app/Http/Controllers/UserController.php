@@ -52,8 +52,13 @@ class UserController extends Controller
                 }
 
                 if ($filiere) {
-                    // Fetch subjects of this filiere
-                    $matieres = DB::table('matieres')->where('filiere', $filiere)->get();
+                    // Fetch subjects of this filiere and level
+                    $matieres = DB::table('matieres')
+                        ->where('filiere', $filiere)
+                        ->where(function($q) use ($classe) {
+                            $q->where('niveau', $classe->niveau)->orWhereNull('niveau');
+                        })
+                        ->get();
                     $studentNotes = DB::table('notes')
                         ->where('etudiant_id', $student->id)
                         ->get()
@@ -97,6 +102,24 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->role === 'etudiant' && $request->filled('matricule')) {
+            $matricule = trim($request->matricule);
+            $request->merge([
+                'email' => $matricule . '@etu.iscae.mr',
+                'password' => $request->password ?: ($matricule . 'iscae')
+            ]);
+        } else if ($request->role === 'enseignant' && $request->filled('name')) {
+            $name = trim($request->name);
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+            if (empty($slug)) {
+                $slug = 'prof';
+            }
+            $request->merge([
+                'email' => $slug . '@prof.iscae.mr',
+                'password' => $request->password ?: ($slug . 'iscae')
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:191',
             'email' => 'required|string|email|max:191|unique:users',
@@ -115,10 +138,15 @@ class UserController extends Controller
         
         // Automatic password assignment
         if ($request->role === 'enseignant') {
-            $userData['password'] = Hash::make('profiscae');
+            $name = trim($request->name);
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+            if (empty($slug)) {
+                $slug = 'prof';
+            }
+            $userData['password'] = Hash::make($request->password ?: ($slug . 'iscae'));
         } else if ($request->role === 'etudiant') {
             $matricule = $request->matricule ?: 'etudiant';
-            $userData['password'] = Hash::make($matricule . 'iscae');
+            $userData['password'] = Hash::make($request->password ?: ($matricule . 'iscae'));
         } else {
             // Admin or fallback
             $userData['password'] = Hash::make($request->password ?: 'adminiscae');
@@ -148,6 +176,107 @@ class UserController extends Controller
     }
 
     /**
+     * Bulk create a promo/batch of students.
+     */
+    public function storePromo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'matricule_debut' => 'required|string|max:191',
+            'matricule_fin' => 'required|string|max:191',
+            'classe_id' => 'required|integer|exists:classes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $startStr = trim($request->matricule_debut);
+        $endStr = trim($request->matricule_fin);
+        $classeId = $request->classe_id;
+
+        // Parse starting matricule
+        if (!preg_match('/^([a-zA-Z_-]*)([0-9]+)$/', $startStr, $startMatches)) {
+            return response()->json(['message' => 'Le matricule de début doit se terminer par des chiffres.'], 422);
+        }
+        
+        // Parse ending matricule
+        if (!preg_match('/^([a-zA-Z_-]*)([0-9]+)$/', $endStr, $endMatches)) {
+            return response()->json(['message' => 'Le matricule de fin doit se terminer par des chiffres.'], 422);
+        }
+
+        $prefixStart = $startMatches[1];
+        $numStartStr = $startMatches[2];
+        $numStart = intval($numStartStr);
+
+        $prefixEnd = $endMatches[1];
+        $numEndStr = $endMatches[2];
+        $numEnd = intval($numEndStr);
+
+        if (strtolower($prefixStart) !== strtolower($prefixEnd)) {
+            return response()->json(['message' => 'Les préfixes des matricules de début et de fin ne correspondent pas.'], 422);
+        }
+
+        if ($numStart > $numEnd) {
+            return response()->json(['message' => 'Le matricule de début doit être inférieur ou égal au matricule de fin.'], 422);
+        }
+
+        // Limit the batch size
+        $count = $numEnd - $numStart + 1;
+        if ($count > 100) {
+            return response()->json(['message' => 'La taille de la promotion ne peut pas dépasser 100 étudiants à la fois.'], 422);
+        }
+
+        $createdCount = 0;
+        $skippedCount = 0;
+        $studentsCreated = [];
+
+        // Width for padding (e.g. 001 has length 3)
+        $paddingWidth = strlen($numStartStr);
+
+        DB::beginTransaction();
+        try {
+            for ($i = $numStart; $i <= $numEnd; $i++) {
+                $paddedNum = str_pad($i, $paddingWidth, '0', STR_PAD_LEFT);
+                $matricule = $prefixStart . $paddedNum;
+                $email = strtolower($matricule) . '@etu.iscae.mr';
+
+                // Check if matricule or email already exists
+                $exists = User::where('matricule', $matricule)->orWhere('email', $email)->exists();
+                if ($exists) {
+                    $skippedCount++;
+                    continue;
+                }
+
+                $rawPassword = $matricule . 'iscae';
+                $student = User::create([
+                    'name' => 'Étudiant ' . $matricule,
+                    'email' => $email,
+                    'matricule' => $matricule,
+                    'password' => Hash::make($rawPassword),
+                    'role' => 'etudiant',
+                ]);
+
+                // Sync with the class
+                $student->classes()->sync([$classeId]);
+
+                $studentsCreated[] = $student;
+                $createdCount++;
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Une erreur est survenue lors de la création en masse : ' . $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'message' => "Création de la promotion terminée ! $createdCount étudiants créés, $skippedCount ignorés (déjà existants).",
+            'count_created' => $createdCount,
+            'count_skipped' => $skippedCount,
+            'students' => $studentsCreated
+        ], 201);
+    }
+
+    /**
      * Update the specified user in storage.
      */
     public function update(Request $request, $id)
@@ -155,6 +284,22 @@ class UserController extends Controller
         $user = User::find($id);
         if (!$user) {
             return response()->json(['message' => 'Utilisateur introuvable'], 404);
+        }
+
+        if ($request->role === 'etudiant' && $request->filled('matricule')) {
+            $matricule = trim($request->matricule);
+            $request->merge([
+                'email' => $matricule . '@etu.iscae.mr'
+            ]);
+        } else if ($request->role === 'enseignant' && $request->filled('name')) {
+            $name = trim($request->name);
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
+            if (empty($slug)) {
+                $slug = 'prof';
+            }
+            $request->merge([
+                'email' => $slug . '@prof.iscae.mr'
+            ]);
         }
 
         $validator = Validator::make($request->all(), [
@@ -263,15 +408,22 @@ class UserController extends Controller
             }
         }
 
-        // Fetch all subjects (matieres) for this filiere, left-joining student grades if entered
-        $notes = DB::table('matieres')
+        // Fetch all subjects (matieres) for this filiere and level, left-joining student grades if entered
+        $notesQuery = DB::table('matieres')
             ->leftJoin('notes', function($join) use ($id) {
                 $join->on('matieres.id', '=', 'notes.matiere_id')
                      ->where('notes.etudiant_id', '=', $id);
             })
             ->leftJoin('users as profs', 'notes.prof_id', '=', 'profs.id')
-            ->where('matieres.filiere', $filiere)
-            ->select(
+            ->where('matieres.filiere', $filiere);
+
+        if ($classe) {
+            $notesQuery->where(function($q) use ($classe) {
+                $q->where('matieres.niveau', $classe->niveau)->orWhereNull('matieres.niveau');
+            });
+        }
+
+        $notes = $notesQuery->select(
                 'matieres.nom_matiere',
                 'matieres.coefficient',
                 'notes.valeur_note',

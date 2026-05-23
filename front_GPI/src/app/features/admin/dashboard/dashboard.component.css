@@ -354,6 +354,95 @@
   border-radius: 100px;
 }
 
+/* Premium Badges for Filiere */
+.badge-filiere {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-filiere.ig { background-color: #e0f2fe; color: #0369a1; }
+.badge-filiere.fc { background-color: #dcfce7; color: #15803d; }
+.badge-filiere.grh { background-color: #f3e8ff; color: #6b21a8; }
+.badge-filiere.ba { background-color: #fef3c7; color: #b45309; }
+.badge-filiere.di { background-color: #e0e7ff; color: #4338ca; }
+.badge-filiere.rt { background-color: #ffe4e6; color: #be123c; }
+
+.badge-filiere .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Premium Level Badges */
+.badge-level-premium {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid transparent;
+}
+.badge-level-premium.lvl-l1 { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.badge-level-premium.lvl-l2 { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+.badge-level-premium.lvl-l3 { background-color: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.badge-level-premium.lvl-m1 { background-color: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+.badge-level-premium.lvl-m2 { background-color: #fff1f2; color: #be123c; border-color: #ffe4e6; }
+
+/* Coefficient Circular Badge */
+.coefficient-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Card Header Counters */
+.badge-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #e8f0fe;
+  color: #1560bd;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(21, 96, 189, 0.15);
+}
+.badge-count.purple {
+  background-color: #faf5ff;
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+/* Scrollbar Customization for Tables */
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.table-responsive::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 .action-btn-edit {
   background: none;
   border: none;
@@ -385,6 +474,56 @@
 .action-btn-delete:hover {
   background-color: #fef2f2;
   transform: scale(1.1);
+}
+
+/* Premium Circular Delete Action */
+.action-btn-delete-premium {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fff5f5;
+  color: #fa5252;
+  border: 1px solid #ffe3e3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.action-btn-delete-premium:hover {
+  background-color: #fa5252;
+  color: #ffffff;
+  border-color: #fa5252;
+  transform: scale(1.08) rotate(8deg);
+  box-shadow: 0 4px 12px rgba(250, 82, 82, 0.25);
+}
+.action-btn-delete-premium i {
+  font-size: 0.85rem;
+}
+
+/* Premium Circular Edit Action */
+.action-btn-edit-premium {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e8f0fe;
+  color: #1560bd;
+  border: 1px solid rgba(21, 96, 189, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.action-btn-edit-premium:hover {
+  background-color: #1560bd;
+  color: #ffffff;
+  border-color: #1560bd;
+  transform: scale(1.08) rotate(-8deg);
+  box-shadow: 0 4px 12px rgba(21, 96, 189, 0.25);
+}
+.action-btn-edit-premium i {
+  font-size: 0.85rem;
 }
 
 /* Notification Popups */
@@ -491,6 +630,18 @@
   background: #ffffff;
   padding: 1.5rem;
   border-radius: 12px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1rem;
+}
+
+@media (min-width: 576px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* Optimisation et impression du Bulletin de Notes */

@@ -95,150 +95,326 @@
       
       <!-- ================= CLASSES SECTION ================= -->
       <ng-container *ngIf="activeTab() === 'classes'">
-        <!-- Adding Class Form Card -->
-        <div class="custom-card">
-          <div class="card-header-custom">
-            <h5>Ajouter une Classe</h5>
-          </div>
-          <div class="card-body-custom">
-            <div class="mb-4">
-              <label class="form-label-custom">Filière / Nom de la classe</label>
-              <select [(ngModel)]="formClasse.nom_classe" class="form-control-custom">
-                <option value="IG">IG (Informatique de Gestion)</option>
-                <option value="FC">FC (Finance Comptabilité)</option>
-                <option value="GRH">GRH (Gestion des Ressources Humaines)</option>
-                <option value="BA">BA (Banking & Administration)</option>
-                <option value="DI">DI (Développement Informatique)</option>
-                <option value="RT">RT (Réseaux & Télécoms)</option>
-              </select>
+        
+        <!-- Forms Row (Side-by-side using CSS Grid) -->
+        <div class="forms-container-grid" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+          <!-- Adding Class Form Card -->
+          <div class="custom-card">
+            <div class="card-header-custom">
+              <h5>Ajouter une Classe</h5>
             </div>
+            <div class="card-body-custom">
+              <div class="mb-4">
+                <label class="form-label-custom">Filière / Nom de la classe</label>
+                <select [(ngModel)]="formClasse.nom_classe" class="form-control-custom">
+                  <option value="IG">IG (Informatique de Gestion)</option>
+                  <option value="FC">FC (Finance Comptabilité)</option>
+                  <option value="GRH">GRH (Gestion des Ressources Humaines)</option>
+                  <option value="BA">BA (Banking & Administration)</option>
+                  <option value="DI">DI (Développement Informatique)</option>
+                  <option value="RT">RT (Réseaux & Télécoms)</option>
+                </select>
+              </div>
+              
+              <div class="mb-4">
+                <label class="form-label-custom">Niveau d'études</label>
+                <select [(ngModel)]="formClasse.niveau" class="form-control-custom">
+                  <option value="L1">Licence 1 (L1)</option>
+                  <option value="L2">Licence 2 (L2)</option>
+                  <option value="L3">Licence 3 (L3)</option>
+                  <option value="M1">Master 1 (M1)</option>
+                  <option value="M2">Master 2 (M2)</option>
+                </select>
+              </div>
+
+              <button (click)="saveClasse()" class="btn-primary-custom mt-2">
+                <i class="fa-solid fa-circle-check me-2"></i> Enregistrer la Classe
+              </button>
+            </div>
+          </div>
+
+          <!-- Adding Matiere Form Card -->
+          <div class="custom-card">
+            <div class="card-header-custom">
+              <h5>{{ formMatiere.id ? 'Modifier la Matière' : 'Ajouter une Matière' }}</h5>
+            </div>
+            <div class="card-body-custom">
+              <div class="form-grid-2">
+                <div class="mb-4">
+                  <label class="form-label-custom">Nom de la Matière</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="formMatiere.nom_matiere" 
+                    class="form-control-custom"
+                    placeholder="Ex: Programmation Orientée Objet"
+                  >
+                </div>
+                
+                <div class="mb-4">
+                  <label class="form-label-custom">Coefficient</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="formMatiere.coefficient" 
+                    class="form-control-custom"
+                    min="1"
+                    max="10"
+                  >
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label-custom">Filière Associée</label>
+                  <select [(ngModel)]="formMatiere.filiere" class="form-control-custom">
+                    <option value="IG">IG (Informatique de Gestion)</option>
+                    <option value="FC">FC (Finance Comptabilité)</option>
+                    <option value="GRH">GRH (Gestion des Ressources Humaines)</option>
+                    <option value="BA">BA (Banking & Administration)</option>
+                    <option value="DI">DI (Développement Informatique)</option>
+                    <option value="RT">RT (Réseaux & Télécoms)</option>
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label-custom">Niveau Associé</label>
+                  <select [(ngModel)]="formMatiere.niveau" class="form-control-custom">
+                    <option value="L1">Licence 1 (L1)</option>
+                    <option value="L2">Licence 2 (L2)</option>
+                    <option value="L3">Licence 3 (L3)</option>
+                    <option value="M1">Master 1 (M1)</option>
+                    <option value="M2">Master 2 (M2)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <button (click)="saveMatiere()" class="btn-primary-custom mt-2" style="flex: 2;">
+                  <i class="fa-solid fa-circle-check me-2"></i> {{ formMatiere.id ? 'Enregistrer' : 'Enregistrer la Matière' }}
+                </button>
+                <button *ngIf="formMatiere.id" (click)="resetMatiereForm()" class="btn-primary-custom mt-2" style="flex: 1; background: #64748b; box-shadow: none;">
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
             
-            <div class="mb-4">
-              <label class="form-label-custom">Niveau d'études</label>
-              <select [(ngModel)]="formClasse.niveau" class="form-control-custom">
-                <option value="L1">Licence 1 (L1)</option>
-                <option value="L2">Licence 2 (L2)</option>
-                <option value="L3">Licence 3 (L3)</option>
-                <option value="M1">Master 1 (M1)</option>
-                <option value="M2">Master 2 (M2)</option>
-              </select>
-            </div>
+            <!-- Tables Row (Stacked vertically) -->
+         <div class="tables-container-vertical" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 2rem; margin-top: 1rem; width: 100%;">
+           
+           <!-- Existing Matieres List Card -->
+           <div class="custom-card">
+             <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center;">
+               <h5 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                 <i class="fa-solid fa-book-open" style="color: #7c3aed;"></i> Matières Existantes
+               </h5>
+               <span class="badge-count purple">{{ matieres().length }} matière(s)</span>
+             </div>
+             <div class="table-responsive" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+               <table class="custom-table">
+                 <thead>
+                   <tr>
+                     <th>Nom de la Matière</th>
+                     <th>Filière</th>
+                     <th>Niveau</th>
+                     <th style="text-align: center; width: 110px;">Coeff</th>
+                     <th style="text-align: right; padding-right: 1.5rem; width: 100px;">Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   <tr *ngFor="let m of matieres()">
+                     <td style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">{{ m.nom_matiere }}</td>
+                     <td>
+                       <span class="badge-filiere" [ngClass]="m.filiere.toLowerCase()">
+                         <span class="dot"></span> {{ m.filiere }}
+                       </span>
+                     </td>
+                     <td>
+                       <span class="badge-level-premium" [ngClass]="m.niveau ? 'lvl-' + m.niveau.toLowerCase() : ''">{{ m.niveau || '-' }}</span>
+                     </td>
+                     <td style="text-align: center;">
+                       <span class="coefficient-badge">
+                         {{ m.coefficient }}
+                       </span>
+                     </td>
+                     <td style="text-align: right; padding-right: 1.5rem;">
+                       <button (click)="editMatiere(m)" class="action-btn-edit-premium" style="margin-right: 0.25rem;" title="Modifier la matière">
+                         <i class="fa-solid fa-pen-to-square"></i>
+                       </button>
+                       <button (click)="deleteMatiere(m.id)" class="action-btn-delete-premium" title="Supprimer la matière">
+                         <i class="fa-solid fa-trash-can"></i>
+                       </button>
+                     </td>
+                   </tr>
+                   <tr *ngIf="matieres().length === 0">
+                     <td colspan="5" style="text-align: center; color: #94a3b8; padding: 3rem 1.5rem;">
+                       <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                         <i class="fa-solid fa-book" style="font-size: 2.5rem; color: #cbd5e1;"></i>
+                         <span style="font-weight: 600; font-size: 0.9rem; color: #475569;">Aucune matière enregistrée</span>
+                         <span style="font-size: 0.78rem; color: #94a3b8; max-width: 250px; line-height: 1.4;">Utilisez le formulaire ci-dessus pour associer des matières aux filières.</span>
+                       </div>
+                     </td>
+                   </tr>
+                 </tbody>
+               </table>
+             </div>
+           </div>
 
-            <button (click)="saveClasse()" class="btn-primary-custom mt-2">
-              <i class="fa-solid fa-circle-check me-2"></i> Enregistrer
-            </button>
-          </div>
-        </div>
+           <!-- Existing Classes List Card -->
+           <div class="custom-card">
+             <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center;">
+               <h5 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                 <i class="fa-solid fa-graduation-cap" style="color: #1560bd;"></i> Classes Existantes
+               </h5>
+               <span class="badge-count">{{ classes().length }} classe(s)</span>
+             </div>
+             <div class="table-responsive" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+               <table class="custom-table">
+                 <thead>
+                   <tr>
+                     <th>Filière de la classe</th>
+                     <th>Niveau d'études</th>
+                     <th style="text-align: right; padding-right: 1.5rem; width: 100px;">Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   <tr *ngFor="let c of classes()">
+                     <td>
+                       <span class="badge-filiere" [ngClass]="c.nom_classe.toLowerCase()">
+                         <span class="dot"></span> {{ c.nom_classe }}
+                       </span>
+                     </td>
+                     <td>
+                       <span class="badge-level-premium" [ngClass]="'lvl-' + c.niveau.toLowerCase()">{{ c.niveau }}</span>
+                     </td>
+                     <td style="text-align: right; padding-right: 1.5rem;">
+                       <button (click)="deleteClasse(c.id)" class="action-btn-delete-premium" title="Supprimer la classe">
+                         <i class="fa-solid fa-trash-can"></i>
+                       </button>
+                     </td>
+                   </tr>
+                   <tr *ngIf="classes().length === 0">
+                     <td colspan="3" style="text-align: center; color: #94a3b8; padding: 3rem 1.5rem;">
+                       <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                         <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; color: #cbd5e1;"></i>
+                         <span style="font-weight: 600; font-size: 0.9rem; color: #475569;">Aucune classe enregistrée</span>
+                         <span style="font-size: 0.78rem; color: #94a3b8; max-width: 250px; line-height: 1.4;">Utilisez le formulaire ci-dessus pour ajouter votre première promotion.</span>
+                       </div>
+                     </td>
+                   </tr>
+                 </tbody>
+               </table>
+             </div>
+           </div>
 
-        <!-- Existing Classes List Card -->
-        <div class="custom-card">
-          <div class="card-header-custom">
-            <h5>Classes Existantes</h5>
-          </div>
-          <div class="table-responsive">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Nom de la classe (Filière)</th>
-                  <th>Niveau</th>
-                  <th style="text-align: right; padding-right: 1.5rem;">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let c of classes()">
-                  <td style="font-weight: 700; color: #0f172a;">{{ c.nom_classe }}</td>
-                  <td>
-                    <span class="badge-level">{{ c.niveau }}</span>
-                  </td>
-                  <td style="text-align: right; padding-right: 1.5rem;">
-                    <button (click)="deleteClasse(c.id)" class="action-btn-delete" title="Supprimer la classe">
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="classes().length === 0">
-                  <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">
-                    Aucune classe enregistrée. Utilisez le formulaire pour en ajouter.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+         </div>
       </ng-container>
 
       <!-- ================= STUDENTS SECTION ================= -->
       <ng-container *ngIf="activeTab() === 'students'">
-        <!-- Adding/Editing Student Form Card -->
-        <div class="custom-card">
-          <div class="card-header-custom">
-            <h5>{{ formStudent.id ? 'Modifier l\'Étudiant' : 'Ajouter un Étudiant' }}</h5>
-          </div>
-          <div class="card-body-custom">
-            <div class="mb-4">
-              <label class="form-label-custom">Nom Complet</label>
-              <input 
-                type="text" 
-                [(ngModel)]="formStudent.name" 
-                class="form-control-custom"
-                placeholder="Ex: Mohamed Lemine"
-              >
+        <!-- Forms Row (Side-by-side using CSS Grid) -->
+        <div class="forms-container-grid" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2rem; width: 100%;">
+          
+          <!-- Card 1: Ajouter/Modifier un Étudiant -->
+          <div class="custom-card" style="margin-bottom: 0;">
+            <div class="card-header-custom" >
+              <h5 style="color: #000000; display: flex; align-items: center; gap: 0.5rem; margin: 0;"> 
+                <i class="fa-solid fa-user-graduate" style="color: #5c99e4;"></i>
+                {{ formStudent.id ? 'Modifier l\'Étudiant' : 'Ajouter un Étudiant' }}
+              </h5>
             </div>
-            
-            <div class="mb-4">
-              <label class="form-label-custom">Email</label>
-              <input 
-                type="email" 
-                [(ngModel)]="formStudent.email" 
-                class="form-control-custom"
-                placeholder="Ex: I12345@etu.iscae.mr"
-              >
-            </div>
+            <div class="card-body-custom">
+              <div class="mb-4">
+                <label class="form-label-custom">Nom Complet</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formStudent.name" 
+                  class="form-control-custom"
+                  placeholder="Ex: Mohamed Lemine"
+                >
+              </div>
+              
+              <div class="mb-4">
+                <label class="form-label-custom">Matricule</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formStudent.matricule" 
+                  class="form-control-custom"
+                  placeholder="Ex: I12345"
+                >
+              </div>
 
-            <div class="mb-4">
-              <label class="form-label-custom">Matricule</label>
-              <input 
-                type="text" 
-                [(ngModel)]="formStudent.matricule" 
-                class="form-control-custom"
-                placeholder="Ex: I12345"
-              >
-            </div>
+              <div class="mb-4">
+                <label class="form-label-custom">Classe</label>
+                <select [(ngModel)]="formStudent.classe_id" class="form-control-custom">
+                  <option value="">-- Sélectionner une classe --</option>
+                  <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+                </select>
+              </div>
 
-            <div class="mb-4">
-              <label class="form-label-custom">Classe</label>
-              <select [(ngModel)]="formStudent.classe_id" class="form-control-custom">
-                <option value="">-- Sélectionner une classe --</option>
-                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label-custom">Mot de Passe (Facultatif)</label>
-              <input 
-                type="password" 
-                [(ngModel)]="formStudent.password" 
-                class="form-control-custom"
-                [placeholder]="formStudent.id ? 'Laisser vide pour ne pas modifier' : 'Automatique : [matricule]iscae'"
-              >
-              <p style="font-size: 0.72rem; color: #64748b; margin: 0.25rem 0 0 0; font-style: italic;">
-                * Par défaut: matricule + "iscae" (ex: I12345iscae)
-              </p>
-            </div>
-
-            <div style="display: flex; gap: 0.5rem;">
-              <button (click)="saveStudent()" class="btn-primary-custom mt-2">
-                <i class="fa-solid fa-circle-check me-2"></i> {{ formStudent.id ? 'Modifier' : 'Enregistrer' }}
-              </button>
-              <button *ngIf="formStudent.id" (click)="resetStudentForm()" class="btn-primary-custom mt-2" style="background: #64748b; box-shadow: none;">
-                Annuler
-              </button>
+              <div style="display: flex; gap: 0.5rem;">
+                <button (click)="saveStudent()" class="btn-primary-custom mt-2">
+                  <i class="fa-solid fa-circle-check me-2"></i> {{ formStudent.id ? 'Modifier' : 'Enregistrer' }}
+                </button>
+                <button *ngIf="formStudent.id" (click)="resetStudentForm()" class="btn-primary-custom mt-2" style="background: #64748b; box-shadow: none;">
+                  Annuler
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- Card 2: Ajouter une Promotion (En masse) -->
+          <div class="custom-card" style="margin-bottom: 0;">
+            <div class="card-header-custom" >
+              <h5 style="color: #000000; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                <i class="fa-solid fa-users-gear" style="color: #5c99e4;"></i> Ajouter une Promo
+              </h5>
+            </div>
+            <div class="card-body-custom">
+              <div class="mb-4">
+                <label class="form-label-custom">Matricule de Début</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formPromo.matricule_debut" 
+                  class="form-control-custom"
+                  placeholder="Ex: I26001"
+                >
+              </div>
+              
+              <div class="mb-4">
+                <label class="form-label-custom">Matricule de Fin</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formPromo.matricule_fin" 
+                  class="form-control-custom"
+                  placeholder="Ex: I26030"
+                >
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label-custom">Classe de Rattachement</label>
+                <select [(ngModel)]="formPromo.classe_id" class="form-control-custom">
+                  <option value="">-- Sélectionner une classe --</option>
+                  <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+                </select>
+              </div>
+
+              <button (click)="savePromo()" class="btn-primary-custom mt-2" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+                <i class="fa-solid fa-cloud-arrow-up me-2"></i> Créer la Promotion
+              </button>
+
+              <div style="background-color: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #f1f5f9; margin-top: 1rem;">
+                <p style="font-size: 0.82rem; color: #475569; margin: 0 0 0.25rem 0; font-weight: 600;">💡 Génération en masse</p>
+                <p style="font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4;">
+                  Saisissez des matricules se terminant par des chiffres (ex: <strong>I26001</strong> à <strong>I26030</strong>). 
+                  Le système générera automatiquement les comptes avec e-mail <strong>[matricule]&#64;etu.iscae.mr</strong> et mot de passe <strong>[matricule]iscae</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Students List Card -->
-        <div class="custom-card">
+        <div class="custom-card" style="grid-column: 1 / -1;">
           <div class="card-header-custom">
             <h5>Liste des Étudiants</h5>
           </div>
@@ -301,74 +477,56 @@
       <!-- ================= TEACHERS SECTION ================= -->
       <ng-container *ngIf="activeTab() === 'teachers'">
         <!-- Adding/Editing Teacher Form Card -->
-        <div class="custom-card">
-          <div class="card-header-custom">
-            <h5>{{ formTeacher.id ? 'Modifier l\'Enseignant' : 'Ajouter un Enseignant' }}</h5>
+        <div class="custom-card" style="grid-column: 1 / -1;">
+          <div class="card-header-custom" >
+            <h5 style="color: #000000; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+              <i class="fa-solid fa-chalkboard-user" style="color: #5c99e4;"></i>
+              {{ formTeacher.id ? 'Modifier l\'Enseignant' : 'Ajouter un Enseignant' }}
+            </h5>
           </div>
           <div class="card-body-custom">
-            <div class="mb-4">
-              <label class="form-label-custom">Nom Complet</label>
-              <input 
-                type="text" 
-                [(ngModel)]="formTeacher.name" 
-                class="form-control-custom"
-                placeholder="Ex: Dr. Ahmed"
-              >
-            </div>
-            
-            <div class="mb-4">
-              <label class="form-label-custom">Email</label>
-              <input 
-                type="email" 
-                [(ngModel)]="formTeacher.email" 
-                class="form-control-custom"
-                placeholder="Ex: prof@iscae.mr"
-              >
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+              <div class="mb-0">
+                <label class="form-label-custom">Nom Complet</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formTeacher.name" 
+                  class="form-control-custom"
+                  placeholder="Ex: Dr. Ahmed"
+                >
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label-custom">Classe Enseignée</label>
+                <select [(ngModel)]="formTeacher.classe_id" (ngModelChange)="onClasseChange($event)" class="form-control-custom">
+                  <option value="">-- Choisir la classe --</option>
+                  <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+                </select>
+              </div>
+
+              <div class="mb-0">
+                <label class="form-label-custom">Matière Enseignée</label>
+                <select [(ngModel)]="formTeacher.matiere_id" class="form-control-custom">
+                  <option value="">-- Choisir la matière --</option>
+                  <option *ngIf="filteredMatieres().length === 0" value="" disabled>-- Choisir d'abord une classe --</option>
+                  <option *ngFor="let m of filteredMatieres()" [value]="m.id">{{ m.nom_matiere }} (Coeff: {{ m.coefficient }})</option>
+                </select>
+              </div>
             </div>
 
-            <div class="mb-4">
-              <label class="form-label-custom">Classe Enseignée</label>
-              <select [(ngModel)]="formTeacher.classe_id" (ngModelChange)="onClasseChange($event)" class="form-control-custom">
-                <option value="">-- Choisir la classe --</option>
-                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label-custom">Matière Enseignée</label>
-              <select [(ngModel)]="formTeacher.matiere_id" class="form-control-custom">
-                <option value="">-- Choisir la matière --</option>
-                <option *ngIf="filteredMatieres().length === 0" value="" disabled>-- Choisir d'abord une classe --</option>
-                <option *ngFor="let m of filteredMatieres()" [value]="m.id">{{ m.nom_matiere }} (Coeff: {{ m.coefficient }})</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label-custom">Mot de Passe (Facultatif)</label>
-              <input 
-                type="password" 
-                [(ngModel)]="formTeacher.password" 
-                class="form-control-custom"
-                [placeholder]="formTeacher.id ? 'Laisser vide pour ne pas modifier' : 'Automatique : profiscae'"
-              >
-              <p style="font-size: 0.72rem; color: #64748b; margin: 0.25rem 0 0 0; font-style: italic;">
-                * Par défaut: "profiscae"
-              </p>
-            </div>
-
-            <div style="display: flex; gap: 0.5rem;">
-              <button (click)="saveTeacher()" class="btn-primary-custom mt-2">
-                <i class="fa-solid fa-circle-check me-2"></i> {{ formTeacher.id ? 'Modifier' : 'Enregistrer' }}
-              </button>
-              <button *ngIf="formTeacher.id" (click)="resetTeacherForm()" class="btn-primary-custom mt-2" style="background: #64748b; box-shadow: none;">
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; width: 100%;">
+              <button *ngIf="formTeacher.id" (click)="resetTeacherForm()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2rem; background: #64748b; box-shadow: none; margin: 0;">
                 Annuler
+              </button>
+              <button (click)="saveTeacher()" class="btn-primary-custom" style="width: auto; padding: 0.75rem 2.5rem; margin: 0;">
+                <i class="fa-solid fa-circle-check me-2"></i> {{ formTeacher.id ? 'Modifier' : 'Enregistrer' }}
               </button>
             </div>
           </div>
         </div>
 
         <!-- Teachers List Card -->
-        <div class="custom-card">
+        <div class="custom-card" style="grid-column: 1 / -1;">
           <div class="card-header-custom">
             <h5>Liste des Enseignants</h5>
           </div>
@@ -582,8 +740,12 @@
             <tr *ngFor="let n of selectedBulletin().notes">
               <td style="border: 1px solid #e2e8f0; font-weight: 600; padding: 0.85rem 1rem;">{{ n.nom_matiere }}</td>
               <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #475569; padding: 0.85rem 1rem;">{{ n.coefficient }}</td>
-              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0f172a; padding: 0.85rem 1rem;">{{ n.valeur_note }}</td>
-              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #1560bd; padding: 0.85rem 1rem;">{{ (n.valeur_note * n.coefficient).toFixed(2) }}</td>
+              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0f172a; padding: 0.85rem 1rem;">
+                {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note : '-' }}
+              </td>
+              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #1560bd; padding: 0.85rem 1rem;">
+                {{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}
+              </td>
               <td style="border: 1px solid #e2e8f0; color: #475569; padding: 0.85rem 1rem;">{{ n.prof_name || 'N/A' }}</td>
             </tr>
           </tbody>

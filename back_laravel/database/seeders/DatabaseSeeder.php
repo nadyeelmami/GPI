@@ -34,15 +34,15 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Administrateur ISCAE',
             'email' => 'admin@iscae.mr',
-            'password' => Hash::make('admin123'),
+            'password' => Hash::make('adminiscae'),
             'role' => 'admin',
         ]);
 
         // Enseignant
         User::create([
-            'name' => 'Professeur Dupont',
-            'email' => 'dupont@iscae.mr',
-            'password' => Hash::make('teacher123'),
+            'name' => 'Professeur Med',
+            'email' => 'med@prof.iscae.mr',
+            'password' => Hash::make('mediscae'),
             'role' => 'enseignant',
         ]);
 
@@ -78,46 +78,46 @@ class DatabaseSeeder extends Seeder
         // Matières par filière
         $matieres = [
             // IG (Informatique de Gestion)
-            ['nom_matiere' => 'Algorithmique & Structures de Données', 'coefficient' => 3, 'filiere' => 'IG'],
-            ['nom_matiere' => 'Bases de Données Relationnelles', 'coefficient' => 3, 'filiere' => 'IG'],
-            ['nom_matiere' => 'Architecture des Ordinateurs', 'coefficient' => 2, 'filiere' => 'IG'],
-            ['nom_matiere' => 'Systèmes d\'Information & UML', 'coefficient' => 3, 'filiere' => 'IG'],
-            ['nom_matiere' => 'Comptabilité Générale', 'coefficient' => 2, 'filiere' => 'IG'],
+            ['nom_matiere' => 'Algorithmique & Structures de Données', 'coefficient' => 3, 'filiere' => 'IG', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Bases de Données Relationnelles', 'coefficient' => 3, 'filiere' => 'IG', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Architecture des Ordinateurs', 'coefficient' => 2, 'filiere' => 'IG', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Systèmes d\'Information & UML', 'coefficient' => 3, 'filiere' => 'IG', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Comptabilité Générale', 'coefficient' => 2, 'filiere' => 'IG', 'niveau' => 'L1'],
             
             // DI (Développement Informatique)
-            ['nom_matiere' => 'Programmation Web (HTML/CSS/JS)', 'coefficient' => 3, 'filiere' => 'DI'],
-            ['nom_matiere' => 'Programmation Orientée Objet (Java/C++)', 'coefficient' => 3, 'filiere' => 'DI'],
-            ['nom_matiere' => 'Algorithmique Avancée', 'coefficient' => 3, 'filiere' => 'DI'],
-            ['nom_matiere' => 'Frameworks Web (Laravel/Angular)', 'coefficient' => 3, 'filiere' => 'DI'],
-            ['nom_matiere' => 'Conception d\'Applications', 'coefficient' => 2, 'filiere' => 'DI'],
+            ['nom_matiere' => 'Programmation Web (HTML/CSS/JS)', 'coefficient' => 3, 'filiere' => 'DI', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Programmation Orientée Objet (Java/C++)', 'coefficient' => 3, 'filiere' => 'DI', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Algorithmique Avancée', 'coefficient' => 3, 'filiere' => 'DI', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Frameworks Web (Laravel/Angular)', 'coefficient' => 3, 'filiere' => 'DI', 'niveau' => 'L3'],
+            ['nom_matiere' => 'Conception d\'Applications', 'coefficient' => 2, 'filiere' => 'DI', 'niveau' => 'L3'],
 
             // RT (Réseaux & Télécoms)
-            ['nom_matiere' => 'Réseaux & Télécommunications', 'coefficient' => 2, 'filiere' => 'RT'],
-            ['nom_matiere' => 'Administration Système (Linux)', 'coefficient' => 3, 'filiere' => 'RT'],
-            ['nom_matiere' => 'Sécurité Informatique', 'coefficient' => 3, 'filiere' => 'RT'],
-            ['nom_matiere' => 'Protocoles Réseaux', 'coefficient' => 3, 'filiere' => 'RT'],
-            ['nom_matiere' => 'Télécommunications Fondamentales', 'coefficient' => 2, 'filiere' => 'RT'],
+            ['nom_matiere' => 'Réseaux & Télécommunications', 'coefficient' => 2, 'filiere' => 'RT', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Administration Système (Linux)', 'coefficient' => 3, 'filiere' => 'RT', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Sécurité Informatique', 'coefficient' => 3, 'filiere' => 'RT', 'niveau' => 'L3'],
+            ['nom_matiere' => 'Protocoles Réseaux', 'coefficient' => 3, 'filiere' => 'RT', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Télécommunications Fondamentales', 'coefficient' => 2, 'filiere' => 'RT', 'niveau' => 'L1'],
 
             // FC (Finance Comptabilité)
-            ['nom_matiere' => 'Comptabilité Analytique', 'coefficient' => 3, 'filiere' => 'FC'],
-            ['nom_matiere' => 'Finance d\'Entreprise', 'coefficient' => 3, 'filiere' => 'FC'],
-            ['nom_matiere' => 'Fiscalité des Entreprises', 'coefficient' => 2, 'filiere' => 'FC'],
-            ['nom_matiere' => 'Contrôle de Gestion', 'coefficient' => 3, 'filiere' => 'FC'],
-            ['nom_matiere' => 'Audit Financier', 'coefficient' => 3, 'filiere' => 'FC'],
+            ['nom_matiere' => 'Comptabilité Analytique', 'coefficient' => 3, 'filiere' => 'FC', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Finance d\'Entreprise', 'coefficient' => 3, 'filiere' => 'FC', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Fiscalité des Entreprises', 'coefficient' => 2, 'filiere' => 'FC', 'niveau' => 'L3'],
+            ['nom_matiere' => 'Contrôle de Gestion', 'coefficient' => 3, 'filiere' => 'FC', 'niveau' => 'L3'],
+            ['nom_matiere' => 'Audit Financier', 'coefficient' => 3, 'filiere' => 'FC', 'niveau' => 'L3'],
 
             // GRH (Gestion des Ressources Humaines)
-            ['nom_matiere' => 'Gestion des Talents', 'coefficient' => 3, 'filiere' => 'GRH'],
-            ['nom_matiere' => 'Droit du Travail', 'coefficient' => 2, 'filiere' => 'GRH'],
-            ['nom_matiere' => 'Recrutement & Intégration', 'coefficient' => 3, 'filiere' => 'GRH'],
-            ['nom_matiere' => 'Management des Organisations', 'coefficient' => 3, 'filiere' => 'GRH'],
-            ['nom_matiere' => 'Communication Interpersonnelle', 'coefficient' => 2, 'filiere' => 'GRH'],
+            ['nom_matiere' => 'Gestion des Talents', 'coefficient' => 3, 'filiere' => 'GRH', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Droit du Travail', 'coefficient' => 2, 'filiere' => 'GRH', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Recrutement & Intégration', 'coefficient' => 3, 'filiere' => 'GRH', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Management des Organisations', 'coefficient' => 3, 'filiere' => 'GRH', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Communication Interpersonnelle', 'coefficient' => 2, 'filiere' => 'GRH', 'niveau' => 'L1'],
 
             // BA (Banking & Administration)
-            ['nom_matiere' => 'Économie Monétaire', 'coefficient' => 3, 'filiere' => 'BA'],
-            ['nom_matiere' => 'Opérations Bancaires', 'coefficient' => 3, 'filiere' => 'BA'],
-            ['nom_matiere' => 'Gestion de Portefeuille', 'coefficient' => 3, 'filiere' => 'BA'],
-            ['nom_matiere' => 'Droit Bancaire', 'coefficient' => 2, 'filiere' => 'BA'],
-            ['nom_matiere' => 'Marketing des Services Financiers', 'coefficient' => 2, 'filiere' => 'BA']
+            ['nom_matiere' => 'Économie Monétaire', 'coefficient' => 3, 'filiere' => 'BA', 'niveau' => 'L1'],
+            ['nom_matiere' => 'Opérations Bancaires', 'coefficient' => 3, 'filiere' => 'BA', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Gestion de Portefeuille', 'coefficient' => 3, 'filiere' => 'BA', 'niveau' => 'L3'],
+            ['nom_matiere' => 'Droit Bancaire', 'coefficient' => 2, 'filiere' => 'BA', 'niveau' => 'L2'],
+            ['nom_matiere' => 'Marketing des Services Financiers', 'coefficient' => 2, 'filiere' => 'BA', 'niveau' => 'L3']
         ];
 
         foreach ($matieres as $m) {

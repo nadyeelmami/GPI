@@ -68,8 +68,10 @@ export class DashboardComponent implements OnInit {
         
         if (res.notes && res.notes.length > 0) {
           res.notes.forEach((n: any) => {
-            totalPoints += parseFloat(n.valeur_note) * n.coefficient;
-            totalCoefficients += n.coefficient;
+            if (n.valeur_note !== null && n.valeur_note !== undefined && n.valeur_note !== '') {
+              totalPoints += parseFloat(n.valeur_note) * n.coefficient;
+              totalCoefficients += n.coefficient;
+            }
           });
           res.moyenneG = totalCoefficients > 0 ? (totalPoints / totalCoefficients) : 0;
         } else {

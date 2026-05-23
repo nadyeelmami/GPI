@@ -82,6 +82,15 @@ export class DashboardComponent implements OnInit {
     annee_scolaire: '2025-2026' 
   };
 
+  // Données du formulaire de Matière
+  formMatiere = {
+    id: null as number | null,
+    nom_matiere: '',
+    coefficient: 1,
+    filiere: 'IG',
+    niveau: 'L1'
+  };
+
   // Données du formulaire d'Étudiant
   formStudent = {
     id: null as number | null,
@@ -89,6 +98,13 @@ export class DashboardComponent implements OnInit {
     email: '',
     matricule: '',
     password: '', // Optionnel, généré automatiquement si vide
+    classe_id: ''
+  };
+
+  // Données du formulaire de Promotion d'Étudiants
+  formPromo = {
+    matricule_debut: '',
+    matricule_fin: '',
     classe_id: ''
   };
 
@@ -123,6 +139,68 @@ export class DashboardComponent implements OnInit {
       next: (res) => this.matieres.set(res),
       error: () => this.showNotification('Erreur de connexion aux matières')
     });
+  }
+
+  saveMatiere() {
+    if (!this.formMatiere.nom_matiere || !this.formMatiere.coefficient) {
+      this.showNotification('Nom et coefficient requis.');
+      return;
+    }
+
+    if (this.formMatiere.id) {
+      // Modification
+      this.http.put(`${this.baseUrl}/matieres/${this.formMatiere.id}`, this.formMatiere).subscribe({
+        next: () => {
+          this.refreshMatieres();
+          this.resetMatiereForm();
+          this.showNotification('Matière modifiée !');
+        },
+        error: (err) => this.showNotification(err.error?.message || 'Erreur lors de la modification de la matière.')
+      });
+    } else {
+      // Ajout
+      this.http.post(`${this.baseUrl}/matieres`, this.formMatiere).subscribe({
+        next: () => {
+          this.refreshMatieres();
+          this.resetMatiereForm();
+          this.showNotification('Matière ajoutée !');
+        },
+        error: (err) => this.showNotification(err.error?.message || 'Erreur lors de l\'ajout de la matière.')
+      });
+    }
+  }
+
+  editMatiere(matiere: any) {
+    this.formMatiere.id = matiere.id;
+    this.formMatiere.nom_matiere = matiere.nom_matiere;
+    this.formMatiere.coefficient = matiere.coefficient;
+    this.formMatiere.filiere = matiere.filiere;
+    this.formMatiere.niveau = matiere.niveau || 'L1';
+  }
+
+  deleteMatiere(id: number) {
+    if (confirm('Supprimer cette matière ?')) {
+      this.http.delete(`${this.baseUrl}/matieres/${id}`).subscribe({
+        next: () => {
+          this.refreshMatieres();
+          if (this.formMatiere.id === id) {
+            this.resetMatiereForm();
+          }
+          this.showNotification('Matière supprimée.');
+        },
+        error: (err) => this.showNotification(err.error?.message || 'Erreur lors de la suppression de la matière.')
+      });
+    }
+  }
+
+  resetMatiereForm() {
+    this.formMatiere = {
+      id: null,
+      nom_matiere: '',
+      coefficient: 1,
+      filiere: 'IG',
+      niveau: 'L1'
+    };
   }
 
   // --- CLASSE ---
@@ -161,22 +239,17 @@ export class DashboardComponent implements OnInit {
   }
 
   saveStudent() {
-    if (!this.formStudent.name || !this.formStudent.email) {
-      this.showNotification('Nom et Email requis.');
+    if (!this.formStudent.name || !this.formStudent.matricule) {
+      this.showNotification('Nom et Matricule requis.');
       return;
     }
 
     const payload: any = {
       name: this.formStudent.name,
-      email: this.formStudent.email,
       role: 'etudiant',
       matricule: this.formStudent.matricule || null,
       classe_id: this.formStudent.classe_id ? parseInt(this.formStudent.classe_id) : null
     };
-
-    if (this.formStudent.password) {
-      payload.password = this.formStudent.password;
-    }
 
     if (this.formStudent.id) {
       // Modification
@@ -218,7 +291,6 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-
   resetStudentForm() {
     this.formStudent = {
       id: null,
@@ -226,6 +298,38 @@ export class DashboardComponent implements OnInit {
       email: '',
       matricule: '',
       password: '',
+      classe_id: ''
+    };
+  }
+
+  savePromo() {
+    if (!this.formPromo.matricule_debut || !this.formPromo.matricule_fin || !this.formPromo.classe_id) {
+      this.showNotification('Tous les champs sont requis (Matricule début, fin et Classe).');
+      return;
+    }
+
+    const payload = {
+      matricule_debut: this.formPromo.matricule_debut,
+      matricule_fin: this.formPromo.matricule_fin,
+      classe_id: parseInt(this.formPromo.classe_id)
+    };
+
+    this.http.post(`${this.baseUrl}/users/promo`, payload).subscribe({
+      next: (res: any) => {
+        this.refreshStudents();
+        this.resetPromoForm();
+        this.showNotification(res.message || 'Promotion d\'étudiants créée avec succès !');
+      },
+      error: (err) => {
+        this.showNotification(err.error?.message || 'Erreur lors de la création de la promotion.');
+      }
+    });
+  }
+
+  resetPromoForm() {
+    this.formPromo = {
+      matricule_debut: '',
+      matricule_fin: '',
       classe_id: ''
     };
   }
@@ -239,22 +343,17 @@ export class DashboardComponent implements OnInit {
   }
 
   saveTeacher() {
-    if (!this.formTeacher.name || !this.formTeacher.email) {
-      this.showNotification('Nom et Email requis.');
+    if (!this.formTeacher.name) {
+      this.showNotification('Nom complet requis.');
       return;
     }
 
     const payload: any = {
       name: this.formTeacher.name,
-      email: this.formTeacher.email,
       role: 'enseignant',
       classe_id: this.formTeacher.classe_id ? parseInt(this.formTeacher.classe_id) : null,
       matiere_id: this.formTeacher.matiere_id ? parseInt(this.formTeacher.matiere_id) : null
     };
-
-    if (this.formTeacher.password) {
-      payload.password = this.formTeacher.password;
-    }
 
     if (this.formTeacher.id) {
       // Modification
@@ -315,15 +414,16 @@ export class DashboardComponent implements OnInit {
   generateBulletin(studentId: number) {
     this.http.get<any>(`${this.baseUrl}/users/${studentId}/bulletin`).subscribe({
       next: (res) => {
-        // Si l'étudiant n'a pas encore de notes réelles enregistrées par l'enseignant, on simule de magnifiques notes pour la démonstration
         if (!res.has_grades) {
-          res.notes = [
-            { nom_matiere: 'Algorithmique & Structures de Données', coefficient: 3, valeur_note: 14.50, type_evaluation: 'Examen', prof_name: 'Dr. Mohamed Lemine' },
-            { nom_matiere: 'Architecture des Ordinateurs', coefficient: 2, valeur_note: 12.00, type_evaluation: 'Examen', prof_name: 'Dr. Professeur prof' },
-            { nom_matiere: 'Bases de Données Relationnelles', coefficient: 3, valeur_note: 16.25, type_evaluation: 'Examen', prof_name: 'Dr. Mohamed Lemine' },
-            { nom_matiere: 'Réseaux & Télécommunications', coefficient: 2, valeur_note: 10.50, type_evaluation: 'Examen', prof_name: 'Dr. Professeur prof' },
-            { nom_matiere: 'Anglais Technique', coefficient: 1, valeur_note: 15.00, type_evaluation: 'Examen', prof_name: 'Mme. Mint Sidi' }
-          ];
+          const mockGrades = [14.50, 12.00, 16.25, 10.50, 15.00, 13.75, 11.50];
+          res.notes = res.notes.map((n: any, idx: number) => {
+            return {
+              ...n,
+              valeur_note: mockGrades[idx % mockGrades.length],
+              type_evaluation: 'Examen',
+              prof_name: n.prof_name !== 'Non assigné' && n.prof_name ? n.prof_name : 'Professeur Indéterminé'
+            };
+          });
           res.isMock = true;
           
           // Calculer la moyenne générale pour les données simulées

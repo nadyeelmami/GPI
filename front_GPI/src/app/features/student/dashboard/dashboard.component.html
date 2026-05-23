@@ -164,7 +164,7 @@
                     <td style="font-weight: 600; color: #1e293b;">{{ note.nom_matiere }}</td>
                     <td style="text-align: center; font-weight: 600; color: #475569;">{{ note.coefficient }}</td>
                     <td style="text-align: center; font-weight: 800; color: #0284c7; font-size: 1.05rem;">
-                      {{ note.valeur_note.toFixed(2) }}
+                      {{ note.valeur_note !== null && note.valeur_note !== undefined ? note.valeur_note.toFixed(2) : '-' }}
                     </td>
                     <td style="text-align: center; font-size: 0.85rem; color: #64748b;">
                       <span class="badge-level" style="background-color: #f1f5f9; color: #475569; font-weight: 600;">

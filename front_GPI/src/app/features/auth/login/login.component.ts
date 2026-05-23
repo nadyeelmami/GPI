@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const emailRegex = /^(I\d+@etu\.iscae\.mr|[a-zA-Z0-9._-]+@iscae\.mr)$/;
+    const emailRegex = /^(I\d+@etu\.iscae\.mr|[a-zA-Z0-9._-]+@prof\.iscae\.mr|[a-zA-Z0-9._-]+@iscae\.mr)$/;
     
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.pattern(emailRegex)]],
