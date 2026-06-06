@@ -25,4 +25,10 @@ export class AuthService {
     const headers = { Authorization: `Bearer ${token}` };
     return this.http.get(`${this.apiUrl}/user`, { headers });
   }
+
+  getBulletin(studentId: number): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get(`${this.apiUrl}/users/${studentId}/bulletin`, { headers });
+  }
 }

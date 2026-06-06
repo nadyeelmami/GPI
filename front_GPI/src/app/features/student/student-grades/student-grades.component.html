@@ -1,1 +1,141 @@
-<p>student-grades works!</p>
+<div class="grades-container">
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-wrapper">
+    <div class="spinner"></div>
+    <p>Chargement de vos notes...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- Published Bulletin View -->
+    <div *ngIf="hasBulletin && bulletin" class="bulletin-wrapper">
+      <div class="no-print actions-bar">
+        <h3>Mon Bulletin Officiel</h3>
+        <button (click)="printBulletin()" class="btn-print">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimer mon Bulletin</span>
+        </button>
+      </div>
+
+      <div id="printable-bulletin" class="bulletin-sheet">
+        <!-- School Header -->
+        <div class="bulletin-header">
+          <h3>République Islamique de Mauritanie</h3>
+          <p class="header-motto">Honneur - Fraternité - Justice</p>
+          <h4 class="school-title">INSTITUT SUPÉRIEUR DES SCIENCES DE L'ADMINISTRATION ET DES ENTREPRISES (ISCAE)</h4>
+          <p class="document-title">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
+        </div>
+
+        <!-- Student Info -->
+        <div class="student-details-block">
+          <div class="details-column">
+            <p><strong>Nom de l'étudiant :</strong> <span>{{ bulletin.student?.name }}</span></p>
+            <p><strong>Email académique :</strong> <span>{{ bulletin.student?.email }}</span></p>
+          </div>
+          <div class="details-column">
+            <p><strong>Numéro Matricule :</strong> <span class="matricule-badge">{{ bulletin.student?.matricule || '-' }}</span></p>
+            <p><strong>Classe & Niveau :</strong> <span>{{ bulletin.student?.classes?.[0]?.nom_classe || 'Non assigné' }} ({{ bulletin.student?.classes?.[0]?.niveau || '-' }})</span></p>
+          </div>
+        </div>
+
+        <!-- Grades Grid (Visible on screen, hidden on print) -->
+        <div class="grades-grid no-print">
+          <div class="grade-card" *ngFor="let n of bulletin.notes">
+            <div class="grade-card-header">
+              <h4 class="subject-name" [title]="n.nom_matiere">{{ n.nom_matiere }}</h4>
+              <span class="coeff-badge">Coeff: {{ n.coefficient }}</span>
+            </div>
+            <div class="grade-card-body">
+              <div class="grade-value-wrapper">
+                <span class="grade-value" [ngClass]="n.valeur_note >= 10 ? 'pass' : 'fail'">
+                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-' }}
+                </span>
+                <span class="grade-max">/ 20</span>
+              </div>
+              <div class="weighted-value-row">
+                <span class="label">Note Pondérée :</span>
+                <span class="value">{{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}</span>
+              </div>
+            </div>
+            <div class="grade-card-footer">
+              <div class="prof-info">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span [title]="n.prof_name">{{ n.prof_name || 'Non assigné' }}</span>
+              </div>
+              <span class="validation-badge" [ngClass]="n.statut_validation === 1 ? 'validated' : 'draft'">
+                {{ n.statut_validation === 1 ? 'Validé' : 'Brouillon' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grades Table (Visible on print only) -->
+        <div class="table-responsive print-only">
+          <table class="bulletin-table">
+            <thead>
+              <tr>
+                <th>Matière</th>
+                <th class="text-center" style="width: 100px;">Coefficient</th>
+                <th class="text-center" style="width: 100px;">Note /20</th>
+                <th class="text-center" style="width: 120px;">Note Pondérée</th>
+                <th>Enseignant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let n of bulletin.notes">
+                <td class="font-bold">{{ n.nom_matiere }}</td>
+                <td class="text-center coeff-cell">{{ n.coefficient }}</td>
+                <td class="text-center font-bold note-cell">
+                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-' }}
+                </td>
+                <td class="text-center weighted-cell">
+                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}
+                </td>
+                <td class="prof-cell">{{ n.prof_name || 'N/A' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary / Results -->
+        <div class="results-summary-block">
+          <div class="summary-card">
+            <h5>Résultats Globaux</h5>
+            <p>Moyenne Générale : <strong class="moyenne-text">{{ bulletin.moyenneG?.toFixed(2) }} / 20</strong></p>
+            <p>Mention obtenue : <span class="mention-badge">{{ bulletin.mention }}</span></p>
+          </div>
+
+          <div class="signature-block">
+            <p class="date-text">Fait à Nouakchott, le {{ todayStr }}</p>
+            <p class="signature-title">La Direction des Études</p>
+            <div class="official-stamp">Cachet Officiel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unpublished / Waiting Screen -->
+    <div *ngIf="!hasBulletin" class="waiting-wrapper">
+      <div class="waiting-card">
+        <div class="waiting-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <h3>Résultats Non Disponibles</h3>
+        <p class="subtitle">Votre bulletin de notes n'a pas encore été publié officiellement.</p>
+        <div class="waiting-info">
+          <p>L'administration et vos enseignants travaillent actuellement à la saisie et à la validation des résultats. Vous recevrez une notification dans votre espace dès que le relevé de notes officiel sera publié.</p>
+        </div>
+        <a routerLink="/student/dashboard" class="btn-back" style="text-decoration: none;">Retour au Tableau de Bord</a>
+      </div>
+    </div>
+  </ng-container>
+</div>

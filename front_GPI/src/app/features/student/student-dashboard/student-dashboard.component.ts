@@ -26,6 +26,13 @@ export class StudentDashboardComponent implements OnInit {
   currentUser: any = null;
   studentName = 'Esma Dah';
 
+  // Bulletin states
+  bulletin: any = null;
+  isLoadingBulletin = false;
+  hasBulletin = false;
+  moyenneG = 0;
+  mention = '';
+
   notifications: IDashboardNotification[] = [
     { id: 'n1', type: 'bulletin', message: 'Votre bulletin officiel du Semestre 1 est disponible.', time: 'Il y a 10 min', icon: 'fa-file-invoice' },
     { id: 'n2', type: 'note', message: 'Nouvelle note publiée en Développement Web (Angular).', time: 'Il y a 2 heures', icon: 'fa-graduation-cap' },
@@ -42,6 +49,7 @@ export class StudentDashboardComponent implements OnInit {
         if (this.currentUser && this.currentUser.name) {
           this.studentName = this.currentUser.name;
         }
+        this.fetchStudentBulletin();
       } catch (e) {
         console.error('Error parsing user data', e);
       }
@@ -55,9 +63,35 @@ export class StudentDashboardComponent implements OnInit {
           this.studentName = user.name;
         }
         localStorage.setItem('user', JSON.stringify(user));
+        this.fetchStudentBulletin();
       },
       error: (err) => {
         console.error('Error syncing user details in dashboard init', err);
+      }
+    });
+  }
+
+  fetchStudentBulletin(): void {
+    if (!this.currentUser || !this.currentUser.id) return;
+    
+    const isPublished = this.currentUser.bulletin_publie === 1 || this.currentUser.bulletin_publie === true;
+    if (!isPublished) {
+      this.hasBulletin = false;
+      return;
+    }
+
+    this.isLoadingBulletin = true;
+    this.authService.getBulletin(this.currentUser.id).subscribe({
+      next: (res) => {
+        this.bulletin = res;
+        this.hasBulletin = true; // Mark as true if we have the published bulletin
+        this.moyenneG = res.moyenneG || 0;
+        this.mention = res.mention || '';
+        this.isLoadingBulletin = false;
+      },
+      error: (err) => {
+        console.error('Error fetching bulletin in student dashboard', err);
+        this.isLoadingBulletin = false;
       }
     });
   }

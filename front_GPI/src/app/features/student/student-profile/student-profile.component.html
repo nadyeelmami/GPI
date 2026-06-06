@@ -70,12 +70,12 @@
 
         <div class="grid-field">
           <label>Filière d'études</label>
-          <div class="field-value">Licence en Informatique de Gestion (LIG)</div>
+          <div class="field-value">{{ currentUser?.classes?.[0]?.nom_classe || 'Non assigné' }}</div>
         </div>
 
         <div class="grid-field">
           <label>Niveau / Promotion</label>
-          <div class="field-value">2ème Année - Semestre 4</div>
+          <div class="field-value">{{ currentUser?.classes?.[0]?.niveau || 'Non assigné' }}</div>
         </div>
       </div>
     </div>

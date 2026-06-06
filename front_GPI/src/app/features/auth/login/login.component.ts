@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Regex fusionné : Autorise le matricule seul (I12345), le mail étudiant, le mail prof, et le mail admin
+    // Le regex autorise le matricule seul (I12345), @etu.iscae.mr, @prof.iscae.mr et @iscae.mr
     const emailRegex = /^(I\d+|I\d+@etu\.iscae\.mr|[a-zA-Z0-9._-]+@prof\.iscae\.mr|[a-zA-Z0-9._-]+@iscae\.mr)$/;
     
     this.loginForm = this.fb.group({
@@ -46,23 +46,40 @@ export class LoginComponent implements OnInit {
     this.errorMessage = '';
 
     const loginCredentials = { ...this.loginForm.value };
-    // If only the matricule (e.g. I12345) was entered, append the domain suffix
+    
+    // 1. Passage de l'email en minuscules pour éviter les conflits de casse
+    loginCredentials.email = loginCredentials.email.toLowerCase().trim();
+
+    // 2. Si c'est un matricule seul (ex: i12345), on le transforme au format requis
     if (/^I\d+$/i.test(loginCredentials.email)) {
       loginCredentials.email = `${loginCredentials.email.toUpperCase()}@etu.iscae.mr`;
     }
 
     this.authService.login(loginCredentials).subscribe({
       next: (res) => {
-        const role = res.user.role;
+        this.isLoading = false;
+
+        if (!res.user || !res.user.role) {
+          this.errorMessage = "Impossible de récupérer le rôle de l'utilisateur.";
+          return;
+        }
+
+        // 3. Sécurisation du rôle reçu (on retire les majuscules et les espaces)
+        const role = res.user.role.toLowerCase().trim();
+        
         localStorage.setItem('access_token', res.access_token);
         localStorage.setItem('user', JSON.stringify(res.user));
 
+        // 4. Redirections basées sur le rôle nettoyé
         if (role === 'admin') {
           this.router.navigate(['/admin']);
         } else if (role === 'enseignant') {
           this.router.navigate(['/teacher']);
-        } else {
+        } else if (role === 'etudiant') {
           this.router.navigate(['/student']);
+        } else {
+          // Fallback au cas où le rôle renvoyé est inconnu
+          this.errorMessage = `Rôle non reconnu (${role}). Contactez le support.`;
         }
       },
       error: (err) => {
