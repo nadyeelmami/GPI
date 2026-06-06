@@ -165,6 +165,12 @@ export class DashboardComponent implements OnInit {
     this.formMatiere.coefficient = matiere.coefficient;
     this.formMatiere.filiere = matiere.filiere;
     this.formMatiere.niveau = matiere.niveau || 'L1';
+
+    // Fait défiler la page vers le haut pour afficher le formulaire
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   deleteMatiere(id: number) {
@@ -273,6 +279,12 @@ export class DashboardComponent implements OnInit {
     this.formStudent.matricule = student.matricule || '';
     this.formStudent.classe_id = student.classes && student.classes.length > 0 ? student.classes[0].id.toString() : '';
     this.formStudent.password = ''; // Laisse vide si pas de changement
+
+    // Fait défiler la page vers le haut pour afficher le formulaire
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   deleteStudent(id: number) {
@@ -386,6 +398,12 @@ export class DashboardComponent implements OnInit {
       this.formTeacher.classe_ids = [];
       this.selectedTeacherClasseIds.set([]);
       this.formTeacher.matiere_ids = [];
+    }
+
+    // Fait défiler la page vers le haut pour afficher le formulaire
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 

@@ -350,7 +350,7 @@
                 <label class="form-label-custom">Classe</label>
                 <select [(ngModel)]="formStudent.classe_id" class="form-control-custom">
                   <option value="">-- Sélectionner une classe --</option>
-                  <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+                  <option *ngFor="let c of classes()" [value]="c.id.toString()">{{ c.nom_classe }} ({{ c.niveau }})</option>
                 </select>
               </div>
 
@@ -401,7 +401,7 @@
                 </select>
               </div>
 
-              <button (click)="savePromo()" class="btn-primary-custom mt-2" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+              <button (click)="savePromo()" class="btn-primary-custom mt-2" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); ">
                 <i class="fa-solid fa-cloud-arrow-up me-2"></i> Créer la Promotion
               </button>
 
@@ -617,30 +617,35 @@
       <!-- ================= BULLETINS SECTION ================= -->
       <ng-container *ngIf="activeTab() === 'bulletins'">
         <!-- Filter Card -->
-        <div class="custom-card">
+        <div class="custom-card" style="grid-column: 1 / -1; height: fit-content;">
           <div class="card-header-custom">
             <h5>Filtrer les Bulletins</h5>
           </div>
-          <div class="card-body-custom">
-            <div class="mb-4">
-              <label class="form-label-custom">Sélectionner une Classe</label>
-              <select [ngModel]="selectedBulletinClasseId()" (ngModelChange)="selectedBulletinClasseId.set($event)" class="form-control-custom">
+          <div class="card-body-custom" style="display: flex; gap: 2.5rem; align-items: center; flex-wrap: wrap; padding: 0.8rem 2rem;">
+            <!-- Dropdown Section -->
+            <div style="flex: 1; min-width: 260px;">
+              <label class="form-label-custom" style="margin-bottom: 0.4rem;">Sélectionner une Classe</label>
+              <select [ngModel]="selectedBulletinClasseId()" (ngModelChange)="selectedBulletinClasseId.set($event)" class="form-control-custom" style="height: 40px; background-color: #f8fafc; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 10px;">
                 <option value="">Tous les étudiants</option>
                 <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
               </select>
             </div>
             
-            <div style="background-color: #f8fafc; border-radius: 12px; padding: 1rem; border: 1px solid #f1f5f9; margin-top: 1rem;">
-              <p style="font-size: 0.85rem; color: #475569; margin: 0 0 0.5rem 0; font-weight: 600;">💡 Astuce de Gestion</p>
-              <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">
-                Sélectionnez une classe pour afficher uniquement ses étudiants. Vous pouvez générer, imprimer et publier individuellement les bulletins de notes de chaque élève.
-              </p>
+            <!-- Tip Box Section -->
+            <div style="flex: 1.5; min-width: 300px; background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%); border-radius: 12px; padding: 0.75rem 1.25rem; border: 1px solid rgba(21, 96, 189, 0.15); display: flex; gap: 0.75rem; align-items: flex-start;">
+              <span style="font-size: 1.25rem; line-height: 1;">💡</span>
+              <div>
+                <p style="font-size: 0.8rem; color: #1560bd; margin: 0 0 0.2rem 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Astuce de Gestion</p>
+                <p style="font-size: 0.78rem; color: #475569; margin: 0; line-height: 1.45;">
+                  Sélectionnez une classe pour filtrer les moyennes générales de vos étudiants. Vous pouvez ensuite générer, publier et imprimer individuellement leurs bulletins de notes.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Students & Bulletins List Card -->
-        <div class="custom-card">
+        <div class="custom-card" style="grid-column: 1 / -1;">
           <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center;">
             <h5>Moyennes et Bulletins</h5>
             <span class="badge-level" style="background-color: #e8f0fe; color: #1560bd;">
