@@ -19,7 +19,7 @@ CREATE TABLE `migrations` (
 
 CREATE TABLE `password_resets` (
   `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(191) COLLATE utf8`mb4_unicode_ci` NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -50,28 +50,29 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
--- Identifiants de connexion par défaut
--- Admin      : admin@iscae.mr / adminiscae
--- Enseignant : med@prof.iscae.mr / mediscae
--- Étudiant   : I12345@etu.iscae.mr / I12345iscae
+
+-- Identifiants de connexion par défaut (Combinés)
+-- Admin      : admin@iscae.mr / adminiscae (ou admin)
+-- Enseignant : med@prof.iscae.mr / mediscae (ou profiscae pour dupont@iscae.mr)
+-- Étudiant   : I12345@etu.iscae.mr / student123 (ou I12345iscae)
 
 insert into users (name, email, matricule, password, role) values
 ('ADMIN', 'admin@iscae.mr', NULL, '$2y$10$kC6LzD7/z/w.4kanhbw6aOXVS/ntY0EtzK1RRysRR4Tr4CxR3K896', 'admin'),
 ('prof', 'med@prof.iscae.mr', NULL, '$2y$10$Tbbo05FYtl7zzYv9lESIJuo3A/CvxlEn0P376a6oeCYCJgAi8z4ZK', 'enseignant'),
-('etudiant', 'I12345@etu.iscae.mr', 'I12345', '$2y$10$ThYgXRZpCJenPLaG9UfLY.roqJyGu2Eu6pZGsI2BuBK9oeqIqdbTK', 'etudiant');
+('etudiant', 'I12345@etu.iscae.mr', 'I12345', '$2y$10$XHoEthj68ymV72lZmLgMM.57.45VKHiX0KqZFsV3yAi7fGSmwFIie', 'etudiant');
 
 CREATE TABLE `classes` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `nom_classe` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Licence 1 Informatique"
-  `niveau` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "L1", "M2"
-  `annee_scolaire` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "2025-2026"
+  `nom_classe` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, 
+  `niveau` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL, 
+  `annee_scolaire` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL, 
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `matieres` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `nom_matiere` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, -- Ex: "Algorithmique"
+  `nom_matiere` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL, 
   `coefficient` int(11) NOT NULL DEFAULT 1,
   `niveau` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `filiere` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -79,12 +80,11 @@ CREATE TABLE `matieres` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE `affectations` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` bigint(20) UNSIGNED NOT NULL, -- L'ID du professeur (clé étrangère vers 'users')
-  `matiere_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la matière (clé étrangère vers 'matieres')
-  `classe_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la classe (clé étrangère vers 'classes')
+  `user_id` bigint(20) UNSIGNED NOT NULL, 
+  `matiere_id` bigint(20) UNSIGNED NOT NULL, 
+  `classe_id` bigint(20) UNSIGNED NOT NULL, 
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   
@@ -97,8 +97,8 @@ CREATE TABLE `affectations` (
 
 CREATE TABLE `etudiant_classe` (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `user_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de l'étudiant
-    `classe_id` bigint(20) UNSIGNED NOT NULL, -- L'ID de la classe
+    `user_id` bigint(20) UNSIGNED NOT NULL, 
+    `classe_id` bigint(20) UNSIGNED NOT NULL, 
     
     CONSTRAINT `fk_etu_classe_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_etu_classe_classe` FOREIGN KEY (`classe_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
@@ -108,12 +108,12 @@ CREATE TABLE `etudiant_classe` (
 
 CREATE TABLE `notes` (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `etudiant_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers users (role etudiant)
-  `matiere_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers matieres
-  `prof_id` bigint(20) UNSIGNED NOT NULL, -- Clé étrangère vers users (role enseignant) - pour garder une trace de qui a noté
-  `valeur_note` decimal(4,2) NOT NULL, -- Permet des notes comme 15.50
-  `statut_validation` boolean NOT NULL DEFAULT 0, -- 0 = saisie en cours (modifiable), 1 = validée (non modifiable)
-  `type_evaluation` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Examen', -- Ex: "Examen", "CC1", "TD"
+  `etudiant_id` bigint(20) UNSIGNED NOT NULL, 
+  `matiere_id` bigint(20) UNSIGNED NOT NULL, 
+  `prof_id` bigint(20) UNSIGNED NOT NULL, 
+  `valeur_note` decimal(4,2) NOT NULL, 
+  `statut_validation` boolean NOT NULL DEFAULT 0, 
+  `type_evaluation` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'Examen', 
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   

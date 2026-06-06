@@ -23,7 +23,8 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const emailRegex = /^(I\d+@etu\.iscae\.mr|[a-zA-Z0-9._-]+@prof\.iscae\.mr|[a-zA-Z0-9._-]+@iscae\.mr)$/;
+    // Regex fusionné : Autorise le matricule seul (I12345), le mail étudiant, le mail prof, et le mail admin
+    const emailRegex = /^(I\d+|I\d+@etu\.iscae\.mr|[a-zA-Z0-9._-]+@prof\.iscae\.mr|[a-zA-Z0-9._-]+@iscae\.mr)$/;
     
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.pattern(emailRegex)]],
@@ -33,7 +34,7 @@ export class LoginComponent implements OnInit {
 
   get isStudent(): boolean {
     const email = this.loginForm.get('email')?.value;
-    return email ? /^I\d+@etu\.iscae\.mr$/.test(email) : false;
+    return email ? /^(I\d+|I\d+@etu\.iscae\.mr)$/i.test(email) : false;
   }
 
   onSubmit(): void {
@@ -44,7 +45,13 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.loginForm.value).subscribe({
+    const loginCredentials = { ...this.loginForm.value };
+    // If only the matricule (e.g. I12345) was entered, append the domain suffix
+    if (/^I\d+$/i.test(loginCredentials.email)) {
+      loginCredentials.email = `${loginCredentials.email.toUpperCase()}@etu.iscae.mr`;
+    }
+
+    this.authService.login(loginCredentials).subscribe({
       next: (res) => {
         const role = res.user.role;
         localStorage.setItem('access_token', res.access_token);

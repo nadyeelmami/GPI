@@ -48,10 +48,10 @@ class DatabaseSeeder extends Seeder
 
         // Étudiant
         User::create([
-            'name' => 'Étudiant Test',
+            'name' => 'Esma Dah',
             'email' => 'I12345@etu.iscae.mr',
             'matricule' => 'I12345',
-            'password' => Hash::make('I12345iscae'),
+            'password' => Hash::make('student123'),
             'role' => 'etudiant',
         ]);
 

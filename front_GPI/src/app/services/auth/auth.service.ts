@@ -13,4 +13,16 @@ export class AuthService {
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
+
+  changePassword(data: any): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post(`${this.apiUrl}/change-password`, data, { headers });
+  }
+
+  getUser(): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get(`${this.apiUrl}/user`, { headers });
+  }
 }

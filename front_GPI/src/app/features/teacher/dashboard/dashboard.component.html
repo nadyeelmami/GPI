@@ -1,6 +1,5 @@
 <div class="dashboard-container">
 
-  <!-- Sidebar -->
   <aside class="sidebar" [class.closed]="!isSidebarOpen()">
     <div class="sidebar-top">
       <div class="brand-section">
@@ -35,7 +34,6 @@
       </nav>
     </div>
 
-    <!-- User profile at the bottom of sidebar -->
     <div class="user-profile-card" *ngIf="teacherUser()">
       <div class="avatar">{{ teacherUser().name.substring(0, 2).toUpperCase() }}</div>
 
@@ -56,7 +54,6 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="main-content">
     <header class="header-container" *ngIf="teacherUser()">
       <div class="header-left">
@@ -71,7 +68,6 @@
       </div>
     </header>
 
-    <!-- Loading State -->
     <div *ngIf="isLoading()" class="loading-state">
       <div class="loading-content">
         <i class="fa-solid fa-circle-notch fa-spin"></i>
@@ -81,7 +77,6 @@
 
     <ng-container *ngIf="!isLoading()">
 
-      <!-- Stats Grid -->
       <div *ngIf="affectation()" class="stats-grid">
         <div class="stat-card">
           <div class="stat-details">
@@ -114,7 +109,6 @@
         </div>
       </div>
 
-      <!-- No Affectation Assigned -->
       <div *ngIf="!affectation()" class="custom-card empty-state-card">
         <div class="empty-state-icon">
           <i class="fa-solid fa-circle-exclamation"></i>
@@ -133,11 +127,9 @@
         </button>
       </div>
 
-      <!-- Active Grading Panel -->
       <div *ngIf="affectation()" class="grading-panel">
         <div class="custom-card">
 
-          <!-- Course Details Header -->
           <div class="card-header-custom grading-header">
             <div class="header-info">
               <span class="badge-filiere" [ngClass]="affectation().classe.nom_classe.toLowerCase()">
@@ -165,7 +157,6 @@
             </div>
           </div>
 
-          <!-- Alert Note if Published -->
           <div *ngIf="isPublished()" class="info-alert">
             <i class="fa-solid fa-circle-info"></i>
             <p>
@@ -225,7 +216,6 @@
                     </td>
                   </tr>
 
-                  <!-- Empty Table State -->
                   <tr *ngIf="studentsGrades().length === 0">
                     <td colspan="6" class="table-empty-msg">
                       <i class="fa-solid fa-inbox"></i>
@@ -236,7 +226,6 @@
               </table>
             </div>
 
-            <!-- Actions Buttons -->
             <div *ngIf="studentsGrades().length > 0 && !isPublished()" class="actions-footer">
               <button (click)="saveDraft()" class="btn-secondary-custom">
                 <i class="fa-solid fa-floppy-disk me-2"></i>
@@ -254,13 +243,11 @@
     </ng-container>
   </main>
 
-  <!-- Notification Toast -->
   <div *ngIf="message()" class="custom-toast" [class.show]="message()">
     <i class="fa-solid fa-circle-info"></i>
     <span>{{ message() }}</span>
   </div>
 
-  <!-- Password Change Modal -->
   <div *ngIf="isPasswordModalOpen()" class="modal-backdrop" (click)="closePasswordModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header-premium">

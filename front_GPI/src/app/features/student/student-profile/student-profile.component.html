@@ -1,0 +1,83 @@
+<div class="profile-container">
+  <header class="profile-header">
+    <h2>Mon Profil</h2>
+    <p class="subtitle">Gérez et consultez vos informations personnelles et académiques.</p>
+  </header>
+
+  <div class="profile-grid">
+    <!-- Left Column: User Card -->
+    <div class="profile-card user-summary-card">
+      <div class="avatar-large">{{ getUserInitials() }}</div>
+      <h3 class="user-fullname">{{ currentUser?.name || 'Esma Dah' }}</h3>
+      <span class="user-role-badge">Étudiant ISCAE</span>
+      
+      <div class="user-status-row">
+        <span class="status-dot active"></span>
+        <span class="status-text">Inscription Active (2025/2026)</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="user-quick-details">
+        <div class="quick-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>{{ currentUser?.email || 'I12345@etu.iscae.mr' }}</span>
+        </div>
+        <div class="quick-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Sécurité : Compte Actif</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Detailed Fields -->
+    <div class="profile-card user-details-card">
+      <h3 class="section-title">Détails de l'étudiant</h3>
+      
+      <div class="details-grid">
+        <div class="grid-field">
+          <label>Matricule académique</label>
+          <div class="field-value">
+            <code>{{ getStudentMatricule() }}</code>
+          </div>
+        </div>
+
+        <div class="grid-field">
+          <label>Prénom</label>
+          <div class="field-value">{{ getStudentFirstName() }}</div>
+        </div>
+
+        <div class="grid-field">
+          <label>Nom de famille</label>
+          <div class="field-value">{{ getStudentLastName() }}</div>
+        </div>
+
+        <div class="grid-field">
+          <label>E-mail Institutionnel</label>
+          <div class="field-value">{{ currentUser?.email || 'I12345@etu.iscae.mr' }}</div>
+        </div>
+
+        <div class="grid-field">
+          <label>Établissement</label>
+          <div class="field-value">Institut Supérieur des Sciences de l'Administration et des Entreprises (ISCAE)</div>
+        </div>
+
+        <div class="grid-field">
+          <label>Filière d'études</label>
+          <div class="field-value">Licence en Informatique de Gestion (LIG)</div>
+        </div>
+
+        <div class="grid-field">
+          <label>Niveau / Promotion</label>
+          <div class="field-value">2ème Année - Semestre 4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
