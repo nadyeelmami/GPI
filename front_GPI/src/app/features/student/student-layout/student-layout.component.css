@@ -106,7 +106,7 @@
   height: 40px;
   object-fit: cover;
   flex-shrink: 0;
-  border-radius: 50%;
+  border-radius: 10%;
   background-color: #ffffff;
 }
 
