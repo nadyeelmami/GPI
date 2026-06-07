@@ -26,6 +26,13 @@ export class DashboardComponent implements OnInit {
 
   // Signal pour filtrer la classe dans l'onglet des bulletins
   selectedBulletinClasseId = signal<string>('');
+  selectedPublishClassId = signal<string>('');
+
+  // Signaux pour le modal d'erreur personnalisé
+  showErrorModal = signal<boolean>(false);
+  errorModalTitle = signal<string>('');
+  errorModalMessage = signal<string>('');
+  errorModalList = signal<string[]>([]);
 
   // Filtrer les étudiants pour l'onglet bulletins
   filteredStudentsForBulletins = computed(() => {
@@ -515,35 +522,6 @@ export class DashboardComponent implements OnInit {
   generateBulletin(studentId: number) {
     this.http.get<any>(`${this.baseUrl}/users/${studentId}/bulletin`).subscribe({
       next: (res) => {
-        if (!res.has_grades) {
-          const mockGrades = [14.50, 12.00, 16.25, 10.50, 15.00, 13.75, 11.50];
-          res.notes = res.notes.map((n: any, idx: number) => {
-            return {
-              ...n,
-              valeur_note: mockGrades[idx % mockGrades.length],
-              type_evaluation: 'Examen',
-              prof_name: n.prof_name !== 'Non assigné' && n.prof_name ? n.prof_name : 'Professeur Indéterminé'
-            };
-          });
-          res.isMock = true;
-          
-          // Calculer la moyenne générale pour les données simulées
-          let totalPoints = 0;
-          let totalCoefficients = 0;
-          res.notes.forEach((n: any) => {
-            totalPoints += parseFloat(n.valeur_note) * n.coefficient;
-            totalCoefficients += n.coefficient;
-          });
-          res.moyenneG = totalCoefficients > 0 ? (totalPoints / totalCoefficients) : 0;
-
-          // Assigner la mention
-          if (res.moyenneG >= 16) res.mention = 'Très Bien';
-          else if (res.moyenneG >= 14) res.mention = 'Bien';
-          else if (res.moyenneG >= 12) res.mention = 'Assez Bien';
-          else if (res.moyenneG >= 10) res.mention = 'Passable';
-          else res.mention = 'Ajourné';
-        }
-
         this.selectedBulletin.set(res);
         this.showBulletinModal.set(true);
       },
@@ -576,7 +554,42 @@ export class DashboardComponent implements OnInit {
           return s;
         }));
       },
-      error: () => this.showNotification('Impossible de modifier le statut de publication du bulletin.')
+      error: (err) => {
+        if (err.status === 422 && err.error?.errors) {
+          this.errorModalTitle.set('Publication Impossible');
+          this.errorModalMessage.set(err.error.message || 'Certaines notes ne sont pas encore publiées par les enseignants.');
+          this.errorModalList.set(err.error.errors);
+          this.showErrorModal.set(true);
+        } else {
+          this.showNotification(err.error?.message || 'Impossible de modifier le statut de publication du bulletin.');
+        }
+      }
+    });
+  }
+
+  publishPromoBulletins() {
+    const classId = this.selectedPublishClassId();
+    if (!classId) {
+      this.showNotification('Veuillez sélectionner une classe à publier.');
+      return;
+    }
+
+    this.http.post(`${this.baseUrl}/classes/${classId}/publish-bulletins`, {}).subscribe({
+      next: (res: any) => {
+        this.showNotification(res.message);
+        this.selectedPublishClassId.set('');
+        this.refreshStudents();
+      },
+      error: (err) => {
+        if (err.status === 422 && err.error?.errors) {
+          this.errorModalTitle.set('Publication Impossible');
+          this.errorModalMessage.set(err.error.message || 'Certaines notes ne sont pas encore publiées par les enseignants.');
+          this.errorModalList.set(err.error.errors);
+          this.showErrorModal.set(true);
+        } else {
+          this.showNotification(err.error?.message || 'Erreur lors de la publication de la promotion.');
+        }
+      }
     });
   }
 

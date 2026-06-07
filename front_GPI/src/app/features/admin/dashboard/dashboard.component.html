@@ -647,9 +647,21 @@
 
         <!-- Students & Bulletins List Card -->
         <div class="custom-card" style="grid-column: 1 / -1;">
-          <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center;">
-            <h5>Moyennes et Bulletins</h5>
-            <span class="badge-level" style="background-color: #e8f0fe; color: #1560bd;">
+          <div class="card-header-custom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h5 style="margin: 0;">Moyennes et Bulletins</h5>
+            
+            <!-- Publish Promo Section -->
+            <div class="no-print" style="display: flex; align-items: center; gap: 0.75rem;">
+              <select [ngModel]="selectedPublishClassId()" (ngModelChange)="selectedPublishClassId.set($event)" class="form-control-custom" style="width: 200px; height: 38px; padding: 0.35rem 0.75rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <option value="">-- Choisir Promo/Classe --</option>
+                <option *ngFor="let c of classes()" [value]="c.id">{{ c.nom_classe }} ({{ c.niveau }})</option>
+              </select>
+              <button (click)="publishPromoBulletins()" class="btn-primary-custom" style="width: auto; height: 38px; padding: 0 1.25rem; font-size: 0.85rem; background: linear-gradient(135deg, #1560bd 0%, #0d4fa9 100%); border-radius: 8px; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                <i class="fa-solid fa-bullhorn"></i> Publier la Promo
+              </button>
+            </div>
+            
+            <span class="badge-level" style="background-color: #e8f0fe; color: #1560bd; margin: 0;">
               {{ filteredStudentsForBulletins().length }} Étudiant(s)
             </span>
           </div>
@@ -794,7 +806,7 @@
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-top: 1.5rem;">
           <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background-color: #f8fafc;">
             <h5 style="margin: 0 0 0.75rem 0; font-weight: 700; color: #1e293b;">Résultats Globaux</h5>
-            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Moyenne Générale : <strong style="color: #1560bd; font-size: 1.1rem; margin-left: 0.25rem;">{{ selectedBulletin().moyenneG.toFixed(2) }} / 20</strong></p>
+            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Moyenne Générale : <strong style="color: #1560bd; font-size: 1.1rem; margin-left: 0.25rem;">{{ selectedBulletin().has_grades ? selectedBulletin().moyenneG.toFixed(2) : '-' }} / 20</strong></p>
             <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Mention obtenue : <span class="badge-level" style="margin-left: 0.25rem; background-color: #e8f0fe; color: #1560bd; font-weight: 700;">{{ selectedBulletin().mention }}</span></p>
           </div>
 
@@ -837,5 +849,34 @@
 <div *ngIf="message()" class="custom-toast">
   <i class="fa-solid fa-circle-info text-info"></i>
   <span>{{ message() }}</span>
+</div>
+
+<!-- ================= ERROR/WARNING MODAL ================= -->
+<div *ngIf="showErrorModal()" class="modal-backdrop">
+  <div class="bulletin-modal-container" style="max-width: 580px; border-top: 4px solid #ef4444; padding: 2rem;">
+    <div style="display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.5rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; border: 1px solid #fee2e2;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <h4 style="font-weight: 800; color: #0f172a; margin: 0 0 0.35rem 0;">{{ errorModalTitle() }}</h4>
+        <p style="font-size: 0.9rem; color: #64748b; margin: 0; line-height: 1.5;">{{ errorModalMessage() }}</p>
+      </div>
+    </div>
+    
+    <!-- Error details list -->
+    <div *ngIf="errorModalList().length > 0" style="background-color: #f8fafc; border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid #f1f5f9; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem;">
+      <p style="font-size: 0.82rem; color: #475569; margin: 0 0 0.6rem 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Détails requis par matière :</p>
+      <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6;">
+        <li *ngFor="let item of errorModalList()" style="margin-bottom: 4px;">{{ item }}</li>
+      </ul>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; width: 100%;">
+      <button (click)="showErrorModal.set(false)" class="btn-primary-custom" style="width: auto; padding: 0.65rem 2.5rem; background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); margin: 0; border: none; color: white;">
+        Compris
+      </button>
+    </div>
+  </div>
 </div>
 

@@ -1,7 +1,16 @@
 <div class="profile-container">
-  <header class="profile-header">
-    <h2>Mon Profil</h2>
-    <p class="subtitle">Gérez et consultez vos informations personnelles et académiques.</p>
+  <header class="profile-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 2rem;">
+    <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="14" x2="21" y2="14"></line>
+      </svg>
+    </button>
+    <div>
+      <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #0f172a;">Mon Profil</h2>
+      <p class="subtitle" style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #64748b;">Gérez et consultez vos informations personnelles et académiques.</p>
+    </div>
   </header>
 
   <div class="profile-grid">
@@ -65,7 +74,7 @@
 
         <div class="grid-field">
           <label>Établissement</label>
-          <div class="field-value">Institut Supérieur des Sciences de l'Administration et des Entreprises (ISCAE)</div>
+          <div class="field-value">L'Institut Supérieur de Comptabilitát et d'Administration des Entreprises (ISCAE)</div>
         </div>
 
         <div class="grid-field">

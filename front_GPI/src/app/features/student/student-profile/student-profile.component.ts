@@ -66,4 +66,8 @@ export class StudentProfileComponent implements OnInit {
     }
     return 'I12345';
   }
+
+  onToggleSidebar(): void {
+    window.dispatchEvent(new Event('toggle-sidebar'));
+  }
 }

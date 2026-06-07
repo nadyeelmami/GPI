@@ -9,14 +9,23 @@
     <!-- Published Bulletin View -->
     <div *ngIf="hasBulletin && bulletin" class="bulletin-wrapper">
       <div class="no-print actions-bar">
-        <h3>Mon Bulletin Officiel</h3>
-        <button (click)="printBulletin()" class="btn-print">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="14" x2="21" y2="14"></line>
+            </svg>
+          </button>
+          <h3 style="margin: 0;">Mon Bulletin Officiel</h3>
+        </div>
+        <button (click)="exportPDF()" class="btn-print">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          <span>Imprimer mon Bulletin</span>
+          <span>Exporter PDF</span>
         </button>
       </div>
 
@@ -25,7 +34,7 @@
         <div class="bulletin-header">
           <h3>République Islamique de Mauritanie</h3>
           <p class="header-motto">Honneur - Fraternité - Justice</p>
-          <h4 class="school-title">INSTITUT SUPÉRIEUR DES SCIENCES DE L'ADMINISTRATION ET DES ENTREPRISES (ISCAE)</h4>
+          <h4 class="school-title">L'Institut Supérieur de Comptabilitát et d'Administration des Entreprises (ISCAE)</h4>
           <p class="document-title">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
         </div>
 
@@ -121,7 +130,16 @@
     </div>
 
     <!-- Unpublished / Waiting Screen -->
-    <div *ngIf="!hasBulletin" class="waiting-wrapper">
+    <div *ngIf="!hasBulletin" class="waiting-wrapper" style="flex-direction: column; gap: 20px;">
+      <div style="align-self: flex-start; margin-bottom: 0.5rem; width: 100%;">
+        <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="14" x2="21" y2="14"></line>
+          </svg>
+        </button>
+      </div>
       <div class="waiting-card">
         <div class="waiting-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

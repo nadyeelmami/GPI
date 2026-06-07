@@ -30,6 +30,7 @@ use App\Http\Controllers\MatiereController;
 Route::get('/classes', [ClasseController::class, 'index']);
 Route::post('/classes', [ClasseController::class, 'store']);
 Route::delete('/classes/{id}', [ClasseController::class, 'destroy']);
+Route::post('/classes/{id}/publish-bulletins', [UserController::class, 'publishClassBulletins']);
 
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users/promo', [UserController::class, 'storePromo']);

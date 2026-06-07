@@ -520,6 +520,82 @@ class UserController extends Controller
         }
 
         $publish = $request->input('publish', true);
+
+        if ($publish) {
+            // Get the class of the student
+            $classe = $student->classes()->first();
+            if (!$classe) {
+                return response()->json(['message' => "Cet étudiant n'est affecté à aucune classe."], 422);
+            }
+            
+            // Determine the student's filiere based on their class name
+            $nom = strtoupper($classe->nom_classe);
+            $filiere = 'IG'; // Default fallback
+            if (str_contains($nom, 'IG')) $filiere = 'IG';
+            elseif (str_contains($nom, 'FC')) $filiere = 'FC';
+            elseif (str_contains($nom, 'GRH')) $filiere = 'GRH';
+            elseif (str_contains($nom, 'BA')) $filiere = 'BA';
+            elseif (str_contains($nom, 'DI')) $filiere = 'DI';
+            elseif (str_contains($nom, 'RT')) $filiere = 'RT';
+            else {
+                if (str_contains($nom, 'DEV') || str_contains($nom, 'DEVELOPPEMENT') || str_contains($nom, 'INFO')) $filiere = 'DI';
+                elseif (str_contains($nom, 'FINANCE') || str_contains($nom, 'COMPTA')) $filiere = 'FC';
+                elseif (str_contains($nom, 'RESEAU') || str_contains($nom, 'TELECOM')) $filiere = 'RT';
+                elseif (str_contains($nom, 'RESSOURCES') || str_contains($nom, 'HUMAIN')) $filiere = 'GRH';
+                else $filiere = $nom;
+            }
+
+            // Fetch subjects of this filiere and level
+            $matieres = DB::table('matieres')
+                ->where('filiere', $filiere)
+                ->where(function($q) use ($classe) {
+                    $q->where('niveau', $classe->niveau)->orWhereNull('niveau');
+                })
+                ->get();
+
+            if ($matieres->isEmpty()) {
+                return response()->json(['message' => 'Aucune matière configurée pour la filière et le niveau de cet étudiant.'], 422);
+            }
+
+            $matiereIds = $matieres->pluck('id');
+
+            // Fetch published notes for this student
+            $publishedNotes = DB::table('notes')
+                ->where('etudiant_id', $id)
+                ->whereIn('matiere_id', $matiereIds)
+                ->where('statut_validation', 1)
+                ->get();
+
+            // Check if there are missing published notes
+            $missingDetailsByMatiere = [];
+            foreach ($matieres as $matiere) {
+                $hasNote = $publishedNotes->contains(function($note) use ($matiere) {
+                    return $note->matiere_id == $matiere->id;
+                });
+                
+                if (!$hasNote) {
+                    // Check if draft exists for this student
+                    $draftExists = DB::table('notes')
+                        ->where('etudiant_id', $id)
+                        ->where('matiere_id', $matiere->id)
+                        ->where('statut_validation', 0)
+                        ->exists();
+                    if ($draftExists) {
+                        $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Brouillon non validé par le professeur)";
+                    } else {
+                        $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Note manquante)";
+                    }
+                }
+            }
+
+            if (!empty($missingDetailsByMatiere)) {
+                return response()->json([
+                    'message' => "Impossible de publier le bulletin : certaines notes ne sont pas encore publiées par les enseignants.",
+                    'errors' => $missingDetailsByMatiere
+                ], 422);
+            }
+        }
+
         $student->bulletin_publie = $publish;
         $student->save();
 
@@ -604,5 +680,108 @@ class UserController extends Controller
         $affectation->delete();
 
         return response()->json(['message' => 'Affectation supprimée avec succès'], 200);
+    }
+
+    /**
+     * Publish bulletins in bulk for a class, under the condition that all grades
+     * of all subjects for that class have been published by the teachers.
+     */
+    public function publishClassBulletins($id)
+    {
+        $classe = Classe::with('students')->find($id);
+        if (!$classe) {
+            return response()->json(['message' => 'Classe introuvable'], 404);
+        }
+
+        $students = $classe->students;
+        if ($students->isEmpty()) {
+            return response()->json(['message' => 'Cette classe ne contient aucun étudiant.'], 422);
+        }
+
+        // Determine the student's filiere based on their class name
+        $nom = strtoupper($classe->nom_classe);
+        $filiere = 'IG'; // Default fallback
+        if (str_contains($nom, 'IG')) $filiere = 'IG';
+        elseif (str_contains($nom, 'FC')) $filiere = 'FC';
+        elseif (str_contains($nom, 'GRH')) $filiere = 'GRH';
+        elseif (str_contains($nom, 'BA')) $filiere = 'BA';
+        elseif (str_contains($nom, 'DI')) $filiere = 'DI';
+        elseif (str_contains($nom, 'RT')) $filiere = 'RT';
+        else {
+            if (str_contains($nom, 'DEV') || str_contains($nom, 'DEVELOPPEMENT') || str_contains($nom, 'INFO')) $filiere = 'DI';
+            elseif (str_contains($nom, 'FINANCE') || str_contains($nom, 'COMPTA')) $filiere = 'FC';
+            elseif (str_contains($nom, 'RESEAU') || str_contains($nom, 'TELECOM')) $filiere = 'RT';
+            elseif (str_contains($nom, 'RESSOURCES') || str_contains($nom, 'HUMAIN')) $filiere = 'GRH';
+            else $filiere = $nom;
+        }
+
+        // Fetch subjects of this filiere and level
+        $matieres = DB::table('matieres')
+            ->where('filiere', $filiere)
+            ->where(function($q) use ($classe) {
+                $q->where('niveau', $classe->niveau)->orWhereNull('niveau');
+            })
+            ->get();
+
+        if ($matieres->isEmpty()) {
+            return response()->json(['message' => 'Aucune matière configurée pour cette filière et ce niveau.'], 422);
+        }
+
+        $studentIds = $students->pluck('id');
+        $matiereIds = $matieres->pluck('id');
+
+        // Fetch published notes
+        $publishedNotes = DB::table('notes')
+            ->whereIn('etudiant_id', $studentIds)
+            ->whereIn('matiere_id', $matiereIds)
+            ->where('statut_validation', 1)
+            ->get();
+
+        // Check if there are missing published notes
+        $missingDetailsByMatiere = [];
+        foreach ($matieres as $matiere) {
+            $missingStudentsCount = 0;
+            $hasDraftCount = 0;
+            foreach ($students as $student) {
+                $hasNote = $publishedNotes->contains(function($note) use ($student, $matiere) {
+                    return $note->etudiant_id == $student->id && $note->matiere_id == $matiere->id;
+                });
+                
+                if (!$hasNote) {
+                    $missingStudentsCount++;
+                    // Check if draft exists
+                    $draftExists = DB::table('notes')
+                        ->where('etudiant_id', $student->id)
+                        ->where('matiere_id', $matiere->id)
+                        ->where('statut_validation', 0)
+                        ->exists();
+                    if ($draftExists) {
+                        $hasDraftCount++;
+                    }
+                }
+            }
+
+            if ($missingStudentsCount > 0) {
+                if ($hasDraftCount > 0) {
+                    $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Brouillons non validés par le prof pour {$hasDraftCount} étudiant(s))";
+                } else {
+                    $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Notes manquantes pour {$missingStudentsCount} étudiant(s))";
+                }
+            }
+        }
+
+        if (!empty($missingDetailsByMatiere)) {
+            return response()->json([
+                'message' => 'Impossible de publier la promo : certaines notes ne sont pas encore publiées par les enseignants.',
+                'errors' => $missingDetailsByMatiere
+            ], 422);
+        }
+
+        // Publish all student bulletins for this class
+        User::whereIn('id', $studentIds)->update(['bulletin_publie' => 1]);
+
+        return response()->json([
+            'message' => "Les bulletins de la promotion {$classe->nom_classe} ({$classe->niveau}) ont été publiés avec succès !"
+        ], 200);
     }
 }
