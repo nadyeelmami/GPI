@@ -247,4 +247,58 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= PUBLISH CONFIRMATION MODAL ================= -->
+  <div *ngIf="showPublishConfirmModal()" class="modal-backdrop" (click)="cancelPublish()">
+    <div class="modal-container" style="max-width: 550px;" (click)="$event.stopPropagation()">
+      <div class="modal-header-premium" style="border-bottom: none; padding-bottom: 0.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), transparent), #ffffff;">
+        <div class="modal-title-wrapper">
+          <div class="modal-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 18px rgba(217, 119, 6, 0.22); display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 16px; color: #ffffff;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+
+          <div>
+            <h3>Confirmation de publication</h3>
+            <p>Veuillez confirmer l'action définitive</p>
+          </div>
+        </div>
+
+        <button class="close-btn-premium" (click)="cancelPublish()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-premium" style="padding-top: 0.5rem;">
+        <div style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 1rem; border-radius: 12px; font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.5rem; display: flex; gap: 0.75rem;">
+          <i class="fa-solid fa-circle-info" style="font-size: 1.1rem; margin-top: 2px;"></i>
+          <span>
+            <strong>Attention :</strong> Une fois publiées, les notes ne pourront plus être modifiées par vous et seront transmises directement à l'administration.
+          </span>
+        </div>
+
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span style="color: #64748b; font-weight: 500;">Classe & Niveau :</span>
+            <span style="color: #0f172a; font-weight: 700;">{{ affectation().classe.nom_classe }} ({{ affectation().classe.niveau }})</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px dashed #e2e8f0; padding-top: 0.5rem;">
+            <span style="color: #64748b; font-weight: 500;">Matière :</span>
+            <span style="color: #0f172a; font-weight: 700;">{{ affectation().matiere.nom_matiere }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-top: 1px dashed #e2e8f0; padding-top: 0.5rem;">
+            <span style="color: #64748b; font-weight: 500;">Étudiants concernés :</span>
+            <span style="color: #0f172a; font-weight: 700;">{{ studentsGrades().length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-premium" style="background-color: #f8fafc; border-top: 1px solid #f1f5f9; padding: 1rem 1.35rem;">
+        <button class="btn-cancel-premium" (click)="cancelPublish()">Annuler</button>
+        <button class="btn-primary-custom btn-auto" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); width: auto;" (click)="confirmPublish()">
+          <i class="fa-solid fa-circle-check me-2"></i>
+          Confirmer la Publication
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

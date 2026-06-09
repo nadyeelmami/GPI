@@ -23,6 +23,7 @@ export class DashboardComponent implements OnInit {
   isSidebarOpen = signal<boolean>(true);
   isPasswordModalOpen = signal<boolean>(false);
   newPassword = signal<string>('');
+  showPublishConfirmModal = signal<boolean>(false);
 
   private baseUrl = 'http://localhost:8000/api';
 
@@ -152,9 +153,19 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    if (!confirm('Attention : Une fois publiées, les notes ne pourront plus être modifiées par vous et seront transmises à l\'administration. Souhaitez-vous publier ?')) {
-      return;
-    }
+    this.showPublishConfirmModal.set(true);
+  }
+
+  cancelPublish() {
+    this.showPublishConfirmModal.set(false);
+  }
+
+  confirmPublish() {
+    this.showPublishConfirmModal.set(false);
+    const aff = this.affectation();
+    const teacher = this.teacherUser();
+    if (!aff || !teacher) return;
+    const list = this.studentsGrades();
 
     const flattenedGrades: any[] = [];
     list.forEach(g => {
