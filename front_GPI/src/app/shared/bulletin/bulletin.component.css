@@ -1,0 +1,260 @@
+/* Official Bulletin Sheet styling */
+.bulletin-sheet {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+}
+
+.bulletin-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  border-bottom: 2px double #cbd5e1;
+  padding-bottom: 1.5rem;
+}
+
+.bulletin-header h3 {
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin: 0;
+  text-transform: uppercase;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+}
+
+.header-motto {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 0.2rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.school-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1560bd;
+  margin: 0.5rem 0 0 0;
+}
+
+.document-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0.25rem 0 0 0;
+  letter-spacing: 0.5px;
+}
+
+/* Student detail row */
+.student-details-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  border: 1px solid #f1f5f9;
+}
+
+.student-details-block p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.student-details-block p strong {
+  color: #475569;
+}
+
+.student-details-block p span {
+  color: #0f172a;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.matricule-badge {
+  color: #1560bd !important;
+  font-weight: 700 !important;
+}
+
+/* Bulletin Table Styling */
+.bulletin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.bulletin-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.bulletin-table td {
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.coeff-cell {
+  font-weight: 600;
+  color: #475569;
+}
+
+.note-cell {
+  color: #0f172a;
+}
+
+.weighted-cell {
+  font-weight: 600;
+  color: #1560bd;
+}
+
+.prof-cell {
+  color: #475569;
+}
+
+/* Results summary and signature block */
+.results-summary-block {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.summary-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background-color: #f8fafc;
+}
+
+.summary-card h5 {
+  margin: 0 0 0.85rem 0;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.summary-card p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.moyenne-text {
+  color: #1560bd;
+  font-size: 1.15rem;
+  margin-left: 0.25rem;
+}
+
+.mention-badge {
+  margin-left: 0.25rem;
+  background-color: #e8f0fe;
+  color: #1560bd;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.signature-block {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.date-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.signature-title {
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0.5rem 0 0 0;
+  text-decoration: underline;
+}
+
+.official-stamp {
+  height: 65px;
+  width: 130px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Printing Media Query */
+@media print {
+  /* Hide navbar, sidebar, wrapper headers, and screen grades grid */
+  .no-print, 
+  .no-print *,
+  aside,
+  header,
+  .app-header,
+  .sidebar,
+  .sidebar * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Make page layout fullscreen for print */
+  body, .wrapper, .main-content, .grades-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  /* Show print elements */
+  .print-only {
+    display: block !important;
+  }
+  .print-only table {
+    display: table !important;
+    width: 100% !important;
+  }
+
+  /* Bulletin Sheet positioning and style adjustments */
+  .bulletin-sheet {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Colors force print adjustment */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

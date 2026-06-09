@@ -1,0 +1,72 @@
+<div id="printable-bulletin" class="bulletin-sheet" *ngIf="bulletin">
+  <!-- School Header -->
+  <div class="bulletin-header">
+    <h3>République Islamique de Mauritanie</h3>
+    <p class="header-motto">Honneur - Fraternité - Justice</p>
+    <h4 class="school-title">L'Institut Supérieur de Comptabilité et d'Administration des Entreprises (ISCAE)</h4>
+    <p class="document-title">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
+  </div>
+
+  <!-- Student Info -->
+  <div class="student-details-block">
+    <div class="details-column">
+      <p><strong>Nom de l'étudiant :</strong> <span>{{ bulletin.student?.name }}</span></p>
+      <p><strong>Email académique :</strong> <span>{{ bulletin.student?.email }}</span></p>
+    </div>
+    <div class="details-column">
+      <p><strong>Numéro Matricule :</strong> <span class="matricule-badge">{{ bulletin.student?.matricule || '-' }}</span></p>
+      <p><strong>Classe & Niveau :</strong> <span>{{ bulletin.student?.classes?.[0]?.nom_classe || 'Non assigné' }} ({{ bulletin.student?.classes?.[0]?.niveau || '-' }})</span></p>
+    </div>
+  </div>
+
+  <!-- Grades Table (Visible on screen and print) -->
+  <div class="table-responsive">
+    <table class="bulletin-table">
+      <thead>
+        <tr>
+          <th>Matière</th>
+          <th class="text-center" style="width: 80px;">Coefficient</th>
+          <th class="text-center" style="width: 80px;">Devoir</th>
+          <th class="text-center" style="width: 80px;">Examen</th>
+          <th class="text-center" style="width: 80px;">Moyenne</th>
+          <th class="text-center" style="width: 100px;">Note Pondérée</th>
+          <th>Enseignant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let n of bulletin.notes">
+          <td class="font-bold">{{ n.nom_matiere }}</td>
+          <td class="text-center coeff-cell">{{ n.coefficient }}</td>
+          <td class="text-center">
+            {{ n.note_devoir !== null && n.note_devoir !== undefined ? (n.note_devoir | number:'1.2-2') : '-' }}
+          </td>
+          <td class="text-center">
+            {{ n.note_examen !== null && n.note_examen !== undefined ? (n.note_examen | number:'1.2-2') : '-' }}
+          </td>
+          <td class="text-center font-bold note-cell">
+            {{ n.moyenne !== null && n.moyenne !== undefined ? (n.moyenne | number:'1.2-2') : '-' }}
+          </td>
+          <td class="text-center weighted-cell">
+            {{ n.moyenne !== null && n.moyenne !== undefined ? ((n.moyenne * n.coefficient) | number:'1.2-2') : '-' }}
+          </td>
+          <td class="prof-cell">{{ n.prof_name || 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Summary / Results -->
+  <div class="results-summary-block">
+    <div class="summary-card">
+      <h5>Résultats Globaux</h5>
+      <p>Moyenne Générale : <strong class="moyenne-text">{{ bulletin.moyenneG ? (bulletin.moyenneG | number:'1.2-2') : '-' }} / 20</strong></p>
+      <p>Mention obtenue : <span class="mention-badge">{{ bulletin.mention }}</span></p>
+    </div>
+
+    <div class="signature-block">
+      <p class="date-text">Fait à Nouakchott, le {{ todayStr }}</p>
+      <p class="signature-title">La Direction des Études</p>
+      <div class="official-stamp">Cachet Officiel</div>
+    </div>
+  </div>
+</div>

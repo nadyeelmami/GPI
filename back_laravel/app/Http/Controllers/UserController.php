@@ -62,16 +62,23 @@ class UserController extends Controller
                     $studentNotes = DB::table('notes')
                         ->where('etudiant_id', $student->id)
                         ->get()
-                        ->keyBy('matiere_id');
+                        ->groupBy('matiere_id');
 
                     $totalPoints = 0;
                     $totalCoefficients = 0;
                     $hasAnyGrade = false;
 
                     foreach ($matieres as $matiere) {
-                        $note = $studentNotes->get($matiere->id);
-                        if ($note && $note->valeur_note !== null) {
-                            $totalPoints += floatval($note->valeur_note) * $matiere->coefficient;
+                        $matiereNotes = $studentNotes->get($matiere->id, collect());
+                        $noteExamen = $matiereNotes->firstWhere('type_evaluation', 'Examen');
+                        $noteDevoir = $matiereNotes->firstWhere('type_evaluation', 'Devoir');
+                        
+                        $valExamen = $noteExamen && $noteExamen->valeur_note !== null ? floatval($noteExamen->valeur_note) : null;
+                        $valDevoir = $noteDevoir && $noteDevoir->valeur_note !== null ? floatval($noteDevoir->valeur_note) : null;
+
+                        if ($valExamen !== null && $valDevoir !== null) {
+                            $moyenneMatiere = ($valDevoir * 0.4) + ($valExamen * 0.6);
+                            $totalPoints += $moyenneMatiere * $matiere->coefficient;
                             $totalCoefficients += $matiere->coefficient;
                             $hasAnyGrade = true;
                         }
@@ -448,26 +455,42 @@ class UserController extends Controller
             )
             ->get();
 
+        $groupedNotes = $notes->groupBy('nom_matiere');
+
         $totalPoints = 0;
         $totalCoefficients = 0;
         $hasAnyGrade = false;
         
         $formattedNotes = [];
-        foreach ($notes as $n) {
-            $valeurNote = $n->valeur_note !== null ? floatval($n->valeur_note) : null;
-            if ($valeurNote !== null) {
-                $totalPoints += $valeurNote * $n->coefficient;
-                $totalCoefficients += $n->coefficient;
+        foreach ($groupedNotes as $nomMatiere => $matiereNotes) {
+            $first = $matiereNotes->first();
+            $coefficient = $first->coefficient;
+            $profName = $first->prof_name;
+            
+            $noteExamen = $matiereNotes->firstWhere('type_evaluation', 'Examen');
+            $noteDevoir = $matiereNotes->firstWhere('type_evaluation', 'Devoir');
+            
+            $valExamen = $noteExamen && $noteExamen->valeur_note !== null ? floatval($noteExamen->valeur_note) : null;
+            $valDevoir = $noteDevoir && $noteDevoir->valeur_note !== null ? floatval($noteDevoir->valeur_note) : null;
+            
+            $moyenneMatiere = null;
+            if ($valExamen !== null && $valDevoir !== null) {
+                $moyenneMatiere = ($valDevoir * 0.4) + ($valExamen * 0.6);
+                $totalPoints += $moyenneMatiere * $coefficient;
+                $totalCoefficients += $coefficient;
                 $hasAnyGrade = true;
             }
             
+            $statutValidation = ($noteExamen && $noteExamen->statut_validation == 1 && $noteDevoir && $noteDevoir->statut_validation == 1) ? 1 : 0;
+            
             $formattedNotes[] = [
-                'nom_matiere' => $n->nom_matiere,
-                'coefficient' => intval($n->coefficient),
-                'valeur_note' => $valeurNote,
-                'type_evaluation' => $n->type_evaluation ?: 'Examen',
-                'statut_validation' => $n->statut_validation !== null ? intval($n->statut_validation) : 0,
-                'prof_name' => $n->prof_name ?: 'Non assigné'
+                'nom_matiere' => $nomMatiere,
+                'coefficient' => intval($coefficient),
+                'note_examen' => $valExamen,
+                'note_devoir' => $valDevoir,
+                'moyenne' => $moyenneMatiere !== null ? round($moyenneMatiere, 2) : null,
+                'statut_validation' => $statutValidation,
+                'prof_name' => $profName ?: 'Non assigné'
             ];
         }
 
@@ -569,11 +592,14 @@ class UserController extends Controller
             // Check if there are missing published notes
             $missingDetailsByMatiere = [];
             foreach ($matieres as $matiere) {
-                $hasNote = $publishedNotes->contains(function($note) use ($matiere) {
-                    return $note->matiere_id == $matiere->id;
+                $hasExamen = $publishedNotes->contains(function($note) use ($matiere) {
+                    return $note->matiere_id == $matiere->id && $note->type_evaluation == 'Examen';
+                });
+                $hasDevoir = $publishedNotes->contains(function($note) use ($matiere) {
+                    return $note->matiere_id == $matiere->id && $note->type_evaluation == 'Devoir';
                 });
                 
-                if (!$hasNote) {
+                if (!$hasExamen || !$hasDevoir) {
                     // Check if draft exists for this student
                     $draftExists = DB::table('notes')
                         ->where('etudiant_id', $id)
@@ -583,7 +609,10 @@ class UserController extends Controller
                     if ($draftExists) {
                         $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Brouillon non validé par le professeur)";
                     } else {
-                        $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Note manquante)";
+                        $missingType = [];
+                        if (!$hasExamen) $missingType[] = "Examen";
+                        if (!$hasDevoir) $missingType[] = "Devoir";
+                        $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Note manquante : " . implode(', ', $missingType) . ")";
                     }
                 }
             }
@@ -743,11 +772,14 @@ class UserController extends Controller
             $missingStudentsCount = 0;
             $hasDraftCount = 0;
             foreach ($students as $student) {
-                $hasNote = $publishedNotes->contains(function($note) use ($student, $matiere) {
-                    return $note->etudiant_id == $student->id && $note->matiere_id == $matiere->id;
+                $hasExamen = $publishedNotes->contains(function($note) use ($student, $matiere) {
+                    return $note->etudiant_id == $student->id && $note->matiere_id == $matiere->id && $note->type_evaluation == 'Examen';
+                });
+                $hasDevoir = $publishedNotes->contains(function($note) use ($student, $matiere) {
+                    return $note->etudiant_id == $student->id && $note->matiere_id == $matiere->id && $note->type_evaluation == 'Devoir';
                 });
                 
-                if (!$hasNote) {
+                if (!$hasExamen || !$hasDevoir) {
                     $missingStudentsCount++;
                     // Check if draft exists
                     $draftExists = DB::table('notes')
@@ -765,7 +797,7 @@ class UserController extends Controller
                 if ($hasDraftCount > 0) {
                     $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Brouillons non validés par le prof pour {$hasDraftCount} étudiant(s))";
                 } else {
-                    $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Notes manquantes pour {$missingStudentsCount} étudiant(s))";
+                    $missingDetailsByMatiere[] = "{$matiere->nom_matiere} (Il manque la note de Devoir ou d'Examen pour {$missingStudentsCount} étudiant(s))";
                 }
             }
         }

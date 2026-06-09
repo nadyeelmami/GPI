@@ -13,3 +13,25 @@ body {
 input, select, textarea, button {
   font-family: 'Inter', sans-serif;
 }
+
+.menu-toggle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #1560bd; /* teacher's var(--primary) */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.22s ease;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.menu-toggle-btn:hover {
+  background: #e8f0fe;
+  transform: translateY(-1px);
+}

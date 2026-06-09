@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, SidebarComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -82,7 +83,7 @@ export class DashboardComponent implements OnInit {
   isPublished = computed(() => {
     const list = this.studentsGrades();
     if (list.length === 0) return false;
-    return list.some(g => g.statut_validation === 1);
+    return list.every(g => g.statut_validation === 1);
   });
 
   selectAffectation(aff: any) {
@@ -99,14 +100,16 @@ export class DashboardComponent implements OnInit {
     const teacher = this.teacherUser();
     if (!aff || !teacher) return;
 
+    const flattenedGrades: any[] = [];
+    this.studentsGrades().forEach(g => {
+      flattenedGrades.push({ student_id: g.student_id, valeur_note: g.note_devoir, type_evaluation: 'Devoir' });
+      flattenedGrades.push({ student_id: g.student_id, valeur_note: g.note_examen, type_evaluation: 'Examen' });
+    });
+
     const payload = {
       matiere_id: aff.matiere_id,
       prof_id: teacher.id,
-      grades: this.studentsGrades().map(g => ({
-        student_id: g.student_id,
-        valeur_note: g.valeur_note,
-        type_evaluation: g.type_evaluation || 'Examen'
-      }))
+      grades: flattenedGrades
     };
 
     this.http.post(`${this.baseUrl}/notes`, payload).subscribe({
@@ -127,14 +130,23 @@ export class DashboardComponent implements OnInit {
 
     // Validate that notes are entered and valid
     const list = this.studentsGrades();
-    const emptyGrades = list.filter(g => g.valeur_note === null || g.valeur_note === '');
-    if (emptyGrades.length > 0) {
-      if (!confirm('Certains étudiants n\'ont pas de note. Ils recevront une note vide ou absente. Continuer ?')) {
-        return;
-      }
+    
+    // Check if at least one grade is entered
+    const hasAnyGrade = list.some(g => 
+      (g.note_devoir !== null && g.note_devoir !== '' && g.note_devoir !== undefined) ||
+      (g.note_examen !== null && g.note_examen !== '' && g.note_examen !== undefined)
+    );
+    
+    if (!hasAnyGrade) {
+      this.showNotification('Veuillez saisir au moins une note avant de publier.');
+      return;
     }
 
-    const invalidGrades = list.filter(g => g.valeur_note !== null && g.valeur_note !== '' && (parseFloat(g.valeur_note) < 0 || parseFloat(g.valeur_note) > 20));
+    const invalidGrades = list.filter(g => 
+      (g.note_devoir !== null && g.note_devoir !== '' && (parseFloat(g.note_devoir) < 0 || parseFloat(g.note_devoir) > 20)) ||
+      (g.note_examen !== null && g.note_examen !== '' && (parseFloat(g.note_examen) < 0 || parseFloat(g.note_examen) > 20))
+    );
+    
     if (invalidGrades.length > 0) {
       this.showNotification('Toutes les notes saisies doivent être comprises entre 0 et 20.');
       return;
@@ -144,14 +156,16 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    const flattenedGrades: any[] = [];
+    list.forEach(g => {
+      flattenedGrades.push({ student_id: g.student_id, valeur_note: g.note_devoir, type_evaluation: 'Devoir' });
+      flattenedGrades.push({ student_id: g.student_id, valeur_note: g.note_examen, type_evaluation: 'Examen' });
+    });
+
     const payload = {
       matiere_id: aff.matiere_id,
       prof_id: teacher.id,
-      grades: list.map(g => ({
-        student_id: g.student_id,
-        valeur_note: g.valeur_note,
-        type_evaluation: g.type_evaluation || 'Examen'
-      }))
+      grades: flattenedGrades
     };
 
     this.http.post(`${this.baseUrl}/notes/publish`, payload).subscribe({

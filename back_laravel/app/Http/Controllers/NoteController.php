@@ -36,18 +36,22 @@ class NoteController extends Controller
             ->where('matiere_id', $matiereId)
             ->whereIn('etudiant_id', $students->pluck('id'))
             ->get()
-            ->keyBy('etudiant_id');
+            ->groupBy('etudiant_id');
 
         $result = $students->map(function ($student) use ($notes) {
-            $note = $notes->get($student->id);
+            $studentNotes = $notes->get($student->id, collect());
+            
+            $noteExamen = $studentNotes->firstWhere('type_evaluation', 'Examen');
+            $noteDevoir = $studentNotes->firstWhere('type_evaluation', 'Devoir');
+
             return [
                 'student_id' => $student->id,
                 'name' => $student->name,
                 'matricule' => $student->matricule,
                 'email' => $student->email,
-                'valeur_note' => $note ? $note->valeur_note : null,
-                'statut_validation' => $note ? (int)$note->statut_validation : 0,
-                'type_evaluation' => $note ? $note->type_evaluation : 'Examen',
+                'note_examen' => $noteExamen ? $noteExamen->valeur_note : null,
+                'note_devoir' => $noteDevoir ? $noteDevoir->valeur_note : null,
+                'statut_validation' => ($noteExamen && $noteExamen->statut_validation == 1 && $noteDevoir && $noteDevoir->statut_validation == 1) ? 1 : 0,
             ];
         });
 
@@ -81,7 +85,7 @@ class NoteController extends Controller
             'grades' => 'required|array',
             'grades.*.student_id' => 'required|integer|exists:users,id',
             'grades.*.valeur_note' => 'nullable|numeric|min:0|max:20',
-            'grades.*.type_evaluation' => 'nullable|string|max:50',
+            'grades.*.type_evaluation' => 'required|string|in:Examen,Devoir',
         ]);
 
         if ($validator->fails()) {
@@ -97,13 +101,14 @@ class NoteController extends Controller
             foreach ($grades as $gradeData) {
                 $studentId = $gradeData['student_id'];
                 $valeurNote = $gradeData['valeur_note'];
-                $typeEvaluation = $gradeData['type_evaluation'] ?? 'Examen';
+                $typeEvaluation = $gradeData['type_evaluation'];
 
                 if ($valeurNote === null || $valeurNote === '') {
                     // Delete note if it's null and not validated/published
                     DB::table('notes')
                         ->where('etudiant_id', $studentId)
                         ->where('matiere_id', $matiereId)
+                        ->where('type_evaluation', $typeEvaluation)
                         ->where('statut_validation', 0)
                         ->delete();
                     continue;
@@ -113,6 +118,7 @@ class NoteController extends Controller
                 $existingNote = DB::table('notes')
                     ->where('etudiant_id', $studentId)
                     ->where('matiere_id', $matiereId)
+                    ->where('type_evaluation', $typeEvaluation)
                     ->first();
 
                 if ($existingNote && $existingNote->statut_validation == 1) {
@@ -124,12 +130,12 @@ class NoteController extends Controller
                     [
                         'etudiant_id' => $studentId,
                         'matiere_id' => $matiereId,
+                        'type_evaluation' => $typeEvaluation,
                     ],
                     [
                         'prof_id' => $profId,
                         'valeur_note' => $valeurNote,
                         'statut_validation' => $status,
-                        'type_evaluation' => $typeEvaluation,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]

@@ -97,7 +97,7 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   getUserInitials(): string {
-    if (!this.studentName) return 'ED';
+    if (!this.studentName) return 'UT';
     const name = this.studentName.trim();
     const parts = name.split(/\s+/);
     if (parts.length >= 2) {
@@ -107,24 +107,24 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   getStudentFirstName(): string {
-    if (!this.currentUser || !this.currentUser.name) return 'Esma';
+    if (!this.currentUser || !this.currentUser.name) return 'Utilisateur';
     const parts = this.currentUser.name.trim().split(/\s+/);
     return parts[0];
   }
 
   getStudentLastName(): string {
-    if (!this.currentUser || !this.currentUser.name) return 'Dah';
+    if (!this.currentUser || !this.currentUser.name) return '';
     const parts = this.currentUser.name.trim().split(/\s+/);
-    return parts.slice(1).join(' ') || 'Dah';
+    return parts.slice(1).join(' ') || '';
   }
 
   getStudentMatricule(): string {
-    if (!this.currentUser) return 'I12345';
+    if (!this.currentUser) return '-';
     if (this.currentUser.matricule) return this.currentUser.matricule;
     if (this.currentUser.email) {
       return this.currentUser.email.split('@')[0].toUpperCase();
     }
-    return 'I12345';
+    return '-';
   }
 
   onToggleSidebar(): void {

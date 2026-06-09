@@ -10,12 +10,8 @@
     <div *ngIf="hasBulletin && bulletin" class="bulletin-wrapper">
       <div class="no-print actions-bar">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="14" x2="21" y2="14"></line>
-            </svg>
+          <button class="menu-toggle-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="flex-shrink: 0;">
+            <i class="fa-solid fa-bars"></i>
           </button>
           <h3 style="margin: 0;">Mon Bulletin Officiel</h3>
         </div>
@@ -29,115 +25,14 @@
         </button>
       </div>
 
-      <div id="printable-bulletin" class="bulletin-sheet">
-        <!-- School Header -->
-        <div class="bulletin-header">
-          <h3>République Islamique de Mauritanie</h3>
-          <p class="header-motto">Honneur - Fraternité - Justice</p>
-          <h4 class="school-title">L'Institut Supérieur de Comptabilitát et d'Administration des Entreprises (ISCAE)</h4>
-          <p class="document-title">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
-        </div>
-
-        <!-- Student Info -->
-        <div class="student-details-block">
-          <div class="details-column">
-            <p><strong>Nom de l'étudiant :</strong> <span>{{ bulletin.student?.name }}</span></p>
-            <p><strong>Email académique :</strong> <span>{{ bulletin.student?.email }}</span></p>
-          </div>
-          <div class="details-column">
-            <p><strong>Numéro Matricule :</strong> <span class="matricule-badge">{{ bulletin.student?.matricule || '-' }}</span></p>
-            <p><strong>Classe & Niveau :</strong> <span>{{ bulletin.student?.classes?.[0]?.nom_classe || 'Non assigné' }} ({{ bulletin.student?.classes?.[0]?.niveau || '-' }})</span></p>
-          </div>
-        </div>
-
-        <!-- Grades Grid (Visible on screen, hidden on print) -->
-        <div class="grades-grid no-print">
-          <div class="grade-card" *ngFor="let n of bulletin.notes">
-            <div class="grade-card-header">
-              <h4 class="subject-name" [title]="n.nom_matiere">{{ n.nom_matiere }}</h4>
-              <span class="coeff-badge">Coeff: {{ n.coefficient }}</span>
-            </div>
-            <div class="grade-card-body">
-              <div class="grade-value-wrapper">
-                <span class="grade-value" [ngClass]="n.valeur_note >= 10 ? 'pass' : 'fail'">
-                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-' }}
-                </span>
-                <span class="grade-max">/ 20</span>
-              </div>
-              <div class="weighted-value-row">
-                <span class="label">Note Pondérée :</span>
-                <span class="value">{{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}</span>
-              </div>
-            </div>
-            <div class="grade-card-footer">
-              <div class="prof-info">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span [title]="n.prof_name">{{ n.prof_name || 'Non assigné' }}</span>
-              </div>
-              <span class="validation-badge" [ngClass]="n.statut_validation === 1 ? 'validated' : 'draft'">
-                {{ n.statut_validation === 1 ? 'Validé' : 'Brouillon' }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Grades Table (Visible on print only) -->
-        <div class="table-responsive print-only">
-          <table class="bulletin-table">
-            <thead>
-              <tr>
-                <th>Matière</th>
-                <th class="text-center" style="width: 100px;">Coefficient</th>
-                <th class="text-center" style="width: 100px;">Note /20</th>
-                <th class="text-center" style="width: 120px;">Note Pondérée</th>
-                <th>Enseignant</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let n of bulletin.notes">
-                <td class="font-bold">{{ n.nom_matiere }}</td>
-                <td class="text-center coeff-cell">{{ n.coefficient }}</td>
-                <td class="text-center font-bold note-cell">
-                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-' }}
-                </td>
-                <td class="text-center weighted-cell">
-                  {{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}
-                </td>
-                <td class="prof-cell">{{ n.prof_name || 'N/A' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Summary / Results -->
-        <div class="results-summary-block">
-          <div class="summary-card">
-            <h5>Résultats Globaux</h5>
-            <p>Moyenne Générale : <strong class="moyenne-text">{{ bulletin.moyenneG?.toFixed(2) }} / 20</strong></p>
-            <p>Mention obtenue : <span class="mention-badge">{{ bulletin.mention }}</span></p>
-          </div>
-
-          <div class="signature-block">
-            <p class="date-text">Fait à Nouakchott, le {{ todayStr }}</p>
-            <p class="signature-title">La Direction des Études</p>
-            <div class="official-stamp">Cachet Officiel</div>
-          </div>
-        </div>
-      </div>
+      <app-bulletin [bulletin]="bulletin"></app-bulletin>
     </div>
 
     <!-- Unpublished / Waiting Screen -->
     <div *ngIf="!hasBulletin" class="waiting-wrapper" style="flex-direction: column; gap: 20px;">
       <div style="align-self: flex-start; margin-bottom: 0.5rem; width: 100%;">
-        <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="14" x2="21" y2="14"></line>
-          </svg>
+        <button class="menu-toggle-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale" style="flex-shrink: 0;">
+          <i class="fa-solid fa-bars"></i>
         </button>
       </div>
       <div class="waiting-card">

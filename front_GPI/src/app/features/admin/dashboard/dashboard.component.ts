@@ -2,11 +2,14 @@ import { Component, OnInit, signal, computed, HostListener } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
+import { BulletinComponent } from '../../../shared/bulletin/bulletin.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, SidebarComponent, BulletinComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -114,9 +117,13 @@ export class DashboardComponent implements OnInit {
     matiere_ids: [] as string[]
   };
 
+  profPasswordError = signal<string | null>(null);
+  isSidebarOpen = signal<boolean>(true);
+
   private baseUrl = 'http://localhost:8000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
+
 
   ngOnInit() {
     this.refreshAll();
@@ -610,5 +617,14 @@ export class DashboardComponent implements OnInit {
   showNotification(msg: string) {
     this.message.set(msg);
     setTimeout(() => this.message.set(null), 3000);
+  }
+
+  logout() {
+    localStorage.clear();
+    this.router.navigate(['/login']);
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.set(!this.isSidebarOpen());
   }
 }

@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth/auth.service';
 import { jsPDF } from 'jspdf';
+import { BulletinComponent } from '../../../shared/bulletin/bulletin.component';
 
 @Component({
   selector: 'app-student-grades',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BulletinComponent],
   templateUrl: './student-grades.component.html',
   styleUrl: './student-grades.component.css'
 })
@@ -196,12 +197,14 @@ export class StudentGradesComponent implements OnInit {
     
     doc.setTextColor(71, 85, 105);
     doc.setFont('Helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.text('Matière', 18, tableY + 5.5);
-    doc.text('Coefficient', 95, tableY + 5.5, { align: 'center' });
-    doc.text('Note /20', 120, tableY + 5.5, { align: 'center' });
-    doc.text('Note Pondérée', 150, tableY + 5.5, { align: 'center' });
-    doc.text('Enseignant', 170, tableY + 5.5);
+    doc.text('Coefficient', 80, tableY + 5.5, { align: 'center' });
+    doc.text('Devoir', 100, tableY + 5.5, { align: 'center' });
+    doc.text('Examen', 120, tableY + 5.5, { align: 'center' });
+    doc.text('Moyenne', 140, tableY + 5.5, { align: 'center' });
+    doc.text('Pondérée', 160, tableY + 5.5, { align: 'center' });
+    doc.text('Enseignant', 175, tableY + 5.5);
     
     let currentY = tableY + 8;
     const rowHeight = 8;
@@ -218,20 +221,26 @@ export class StudentGradesComponent implements OnInit {
       doc.text(n.nom_matiere || '', 18, currentY + 5.5);
       
       doc.setFont('Helvetica', 'normal');
-      doc.text(String(n.coefficient || '0'), 95, currentY + 5.5, { align: 'center' });
+      doc.text(String(n.coefficient || '0'), 80, currentY + 5.5, { align: 'center' });
       
-      const gradeVal = n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-';
+      const devoirVal = n.note_devoir !== null && n.note_devoir !== undefined ? n.note_devoir.toFixed(2) : '-';
+      doc.text(String(devoirVal), 100, currentY + 5.5, { align: 'center' });
+
+      const examenVal = n.note_examen !== null && n.note_examen !== undefined ? n.note_examen.toFixed(2) : '-';
+      doc.text(String(examenVal), 120, currentY + 5.5, { align: 'center' });
+
+      const gradeVal = n.moyenne !== null && n.moyenne !== undefined ? n.moyenne.toFixed(2) : '-';
       doc.setFont('Helvetica', 'bold');
-      doc.text(String(gradeVal), 120, currentY + 5.5, { align: 'center' });
+      doc.text(String(gradeVal), 140, currentY + 5.5, { align: 'center' });
       
-      const weightedVal = n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-';
+      const weightedVal = n.moyenne !== null && n.moyenne !== undefined ? (n.moyenne * n.coefficient).toFixed(2) : '-';
       doc.setFont('Helvetica', 'bold');
       doc.setTextColor(21, 96, 189);
-      doc.text(String(weightedVal), 150, currentY + 5.5, { align: 'center' });
+      doc.text(String(weightedVal), 160, currentY + 5.5, { align: 'center' });
       
       doc.setFont('Helvetica', 'normal');
       doc.setTextColor(15, 23, 42);
-      doc.text(n.prof_name || 'Non assigné', 170, currentY + 5.5);
+      doc.text(n.prof_name || 'Non assigné', 175, currentY + 5.5);
       
       currentY += rowHeight;
     });

@@ -1,60 +1,31 @@
-
 <div class="dashboard-container">
   
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div>
-      <div class="brand-section">
-        <h4 class="brand-logo">ISCAE ADMIN</h4>
-        <p class="brand-subtitle">Gestion des Notes</p>
-      </div>
-
-      <nav class="menu-section">
-        <a class="menu-link" [class.active]="activeTab() === 'classes'" (click)="selectTab('classes'); $event.preventDefault();" href="#">
-          <i class="fa-solid fa-graduation-cap"></i>
-          <span>Classes</span>
-        </a>
-        <a class="menu-link" [class.active]="activeTab() === 'students'" (click)="selectTab('students'); $event.preventDefault();" href="#">
-          <i class="fa-solid fa-user-graduate"></i>
-          <span>Étudiants</span>
-        </a>
-        <a class="menu-link" [class.active]="activeTab() === 'teachers'" (click)="selectTab('teachers'); $event.preventDefault();" href="#">
-          <i class="fa-solid fa-chalkboard-user"></i>
-          <span>Enseignants</span>
-        </a>
-        <a class="menu-link" [class.active]="activeTab() === 'bulletins'" (click)="selectTab('bulletins'); $event.preventDefault();" href="#">
-          <i class="fa-solid fa-file-invoice"></i>
-          <span>Bulletins</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- User profile at the bottom of sidebar -->
-    <div class="user-profile-card">
-      <div class="avatar">AD</div>
-      <div class="user-info">
-        <span class="user-name">Directeur</span>
-        <span class="user-role">Administrateur</span>
-      </div>
-      <button onclick="localStorage.clear(); window.location.href = '/login';" class="logout-btn" title="Se déconnecter">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-      </button>
-    </div>
-  </aside>
+  <app-sidebar 
+    [role]="'admin'"
+    [isSidebarOpen]="isSidebarOpen()"
+    [activeAdminTab]="activeTab()"
+    [currentUser]="{name: 'Directeur', role: 'Administrateur'}"
+    [avatarText]="'AD'"
+    [showPasswordAction]="false"
+    (selectAdminTab)="selectTab($event)"
+    (logout)="logout()">
+  </app-sidebar>
 
   <!-- Main Content -->
   <main class="main-content">
     <header class="header-container">
-      <div class="header-title">
-        <h2 *ngIf="activeTab() === 'classes'">Classes & Tableau de Bord</h2>
-        <h2 *ngIf="activeTab() === 'students'">Gestion des Étudiants</h2>
-        <h2 *ngIf="activeTab() === 'teachers'">Gestion des Enseignants</h2>
-        <h2 *ngIf="activeTab() === 'bulletins'">Bulletins de Notes</h2>
-        
-        <p *ngIf="activeTab() === 'classes'">Gérez les classes de l'ISCAE et supervisez les paramètres du système.</p>
-        <p *ngIf="activeTab() === 'students'">Ajoutez, modifiez et gérez les étudiants inscrits à l'ISCAE.</p>
-        <p *ngIf="activeTab() === 'teachers'">Ajoutez, modifiez et gérez le corps enseignant de l'ISCAE.</p>
-        <p *ngIf="activeTab() === 'bulletins'">Générez, publiez et imprimez les bulletins de notes des étudiants de l'ISCAE.</p>
+      <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
+        <button class="menu-toggle-btn" (click)="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="header-title">
+          <h2 *ngIf="activeTab() === 'classes'">Classes & Tableau de Bord</h2>
+          <h2 *ngIf="activeTab() === 'students'">Gestion des Étudiants</h2>
+          <h2 *ngIf="activeTab() === 'teachers'">Gestion des Enseignants</h2>
+          <h2 *ngIf="activeTab() === 'bulletins'">Publication des Bulletins</h2>
+          <p>Supervisez les activités académiques de l'ISCAE</p>
+        </div>
       </div>
     </header>
 
@@ -744,79 +715,20 @@
         <button (click)="closeBulletin()" class="logout-btn" style="color: #64748b; font-size: 1.25rem;"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <div id="printable-bulletin" class="bulletin-sheet">
-        <!-- School Header -->
-        <div class="bulletin-header" style="text-align: center; margin-bottom: 2rem; border-bottom: 2px double #cbd5e1; padding-bottom: 1.5rem;">
-          <h3 style="font-weight: 800; font-size: 1.2rem; margin: 0; text-transform: uppercase; color: #1e293b; letter-spacing: 0.5px;">République Islamique de Mauritanie</h3>
-          <p style="font-size: 0.72rem; color: #64748b; margin: 0.2rem 0; text-transform: uppercase; letter-spacing: 1px;">Honneur - Fraternité - Justice</p>
-          <h4 style="font-weight: 700; font-size: 1.1rem; color: #1560bd; margin: 0.5rem 0 0 0;">INSTITUT SUPÉRIEUR DES CADRES DE L'ÉTAT (ISCAE)</h4>
-          <p style="font-size: 0.85rem; font-weight: 600; color: #475569; margin: 0.25rem 0 0 0;">RELEVÉ DE NOTES ET BULLETIN SEMESTRIEL</p>
-        </div>
-
-        <!-- Simulation Notice if using mock data -->
-        <div *ngIf="selectedBulletin().isMock" class="no-print" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span><strong>Démonstration :</strong> Aucune note n'est actuellement saisie pour cet étudiant en base. Des notes ont été générées pour illustrer le bulletin.</span>
-        </div>
-
-        <!-- Student Details Block -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; background-color: #f8fafc; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; border: 1px solid #f1f5f9;">
-          <div>
-            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Nom de l'étudiant :</strong> <span style="color: #0f172a; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.name }}</span></p>
-            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Email académique :</strong> <span style="color: #0f172a; margin-left: 0.25rem;">{{ selectedBulletin().student.email }}</span></p>
-            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;" class="no-print">
-              <strong>Statut de publication :</strong> 
-              <span *ngIf="selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true" class="badge-level" style="margin-left: 0.25rem; background-color: #e6fcf5; color: #0ca678; font-weight: 700;">PUBLIÉ</span>
-              <span *ngIf="selectedBulletin().student.bulletin_publie !== 1 && selectedBulletin().student.bulletin_publie !== true" class="badge-level" style="margin-left: 0.25rem; background-color: #f1f3f5; color: #868e96; font-weight: 700;">NON PUBLIÉ</span>
-            </p>
-          </div>
-          <div>
-            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Numéro Matricule :</strong> <span style="color: #1560bd; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.matricule || '-' }}</span></p>
-            <p style="margin: 0.35rem 0; font-size: 0.9rem; color: #64748b;"><strong>Classe & Niveau :</strong> <span style="color: #0f172a; font-weight: 600; margin-left: 0.25rem;">{{ selectedBulletin().student.classes && selectedBulletin().student.classes.length > 0 ? selectedBulletin().student.classes[0].nom_classe : 'Non assigné' }} ({{ selectedBulletin().student.classes && selectedBulletin().student.classes.length > 0 ? selectedBulletin().student.classes[0].niveau : '-' }})</span></p>
-          </div>
-        </div>
-
-        <!-- Grades Table -->
-        <table class="custom-table" style="border: 1px solid #e2e8f0; margin-bottom: 2rem;">
-          <thead>
-            <tr style="background-color: #f8fafc;">
-              <th style="border: 1px solid #e2e8f0; padding: 0.75rem 1rem;">Matière</th>
-              <th style="border: 1px solid #e2e8f0; text-align: center; width: 100px; padding: 0.75rem 1rem;">Coefficient</th>
-              <th style="border: 1px solid #e2e8f0; text-align: center; width: 100px; padding: 0.75rem 1rem;">Note /20</th>
-              <th style="border: 1px solid #e2e8f0; text-align: center; width: 120px; padding: 0.75rem 1rem;">Note Pondérée</th>
-              <th style="border: 1px solid #e2e8f0; padding: 0.75rem 1rem;">Enseignant</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let n of selectedBulletin().notes">
-              <td style="border: 1px solid #e2e8f0; font-weight: 600; padding: 0.85rem 1rem;">{{ n.nom_matiere }}</td>
-              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #475569; padding: 0.85rem 1rem;">{{ n.coefficient }}</td>
-              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #0f172a; padding: 0.85rem 1rem;">
-                {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note : '-' }}
-              </td>
-              <td style="border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #1560bd; padding: 0.85rem 1rem;">
-                {{ n.valeur_note !== null && n.valeur_note !== undefined ? (n.valeur_note * n.coefficient).toFixed(2) : '-' }}
-              </td>
-              <td style="border: 1px solid #e2e8f0; color: #475569; padding: 0.85rem 1rem;">{{ n.prof_name || 'N/A' }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Summary & Decision Block -->
-        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; margin-top: 1.5rem;">
-          <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; background-color: #f8fafc;">
-            <h5 style="margin: 0 0 0.75rem 0; font-weight: 700; color: #1e293b;">Résultats Globaux</h5>
-            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Moyenne Générale : <strong style="color: #1560bd; font-size: 1.1rem; margin-left: 0.25rem;">{{ selectedBulletin().has_grades ? selectedBulletin().moyenneG.toFixed(2) : '-' }} / 20</strong></p>
-            <p style="margin: 0.4rem 0; font-size: 0.95rem; color: #475569;">Mention obtenue : <span class="badge-level" style="margin-left: 0.25rem; background-color: #e8f0fe; color: #1560bd; font-weight: 700;">{{ selectedBulletin().mention }}</span></p>
-          </div>
-
-          <div style="text-align: right; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 0.5rem;">
-            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Fait à Nouakchott, le {{ todayStr }}</p>
-            <p style="font-weight: 700; color: #1e293b; margin: 0.5rem 0 0 0; text-decoration: underline;">La Direction des Études</p>
-            <div style="height: 65px; width: 130px; border: 1px dashed #cbd5e1; border-radius: 8px; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.65rem; text-transform: uppercase;">Cachet Officiel</div>
-          </div>
-        </div>
+      <!-- Simulation Notice if using mock data -->
+      <div *ngIf="selectedBulletin().isMock" class="no-print" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span><strong>Démonstration :</strong> Aucune note n'est actuellement saisie pour cet étudiant en base. Des notes ont été générées pour illustrer le bulletin.</span>
       </div>
+
+      <!-- Statut de publication -->
+      <div class="no-print" style="margin-bottom: 1rem; text-align: right;">
+        <span style="font-size: 0.9rem; color: #64748b;"><strong>Statut :</strong></span>
+        <span *ngIf="selectedBulletin().student.bulletin_publie === 1 || selectedBulletin().student.bulletin_publie === true" class="badge-level" style="margin-left: 0.5rem; background-color: #e6fcf5; color: #0ca678; font-weight: 700; padding: 0.3rem 0.6rem; border-radius: 6px;">PUBLIÉ</span>
+        <span *ngIf="selectedBulletin().student.bulletin_publie !== 1 && selectedBulletin().student.bulletin_publie !== true" class="badge-level" style="margin-left: 0.5rem; background-color: #f1f3f5; color: #868e96; font-weight: 700; padding: 0.3rem 0.6rem; border-radius: 6px;">NON PUBLIÉ</span>
+      </div>
+
+      <app-bulletin [bulletin]="selectedBulletin()"></app-bulletin>
 
       <!-- Action Panel for modal -->
       <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem; margin-top: 1.5rem;">

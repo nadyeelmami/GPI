@@ -1,12 +1,8 @@
 <!-- Top Header Navigation -->
 <header class="app-header">
   <div class="header-brand">
-    <button class="toggle-sidebar-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="14" x2="21" y2="14"></line>
-      </svg>
+    <button class="menu-toggle-btn" (click)="onToggleSidebar()" aria-label="Ouvrir / Fermer la barre latérale">
+      <i class="fa-solid fa-bars"></i>
     </button>
     <span>Tableau de bord</span>
   </div>
@@ -24,7 +20,7 @@
           <div class="avatar-large" routerLink="/student/profile" (click)="showProfileDropdown = false" style="cursor: pointer;">{{ getUserInitials() }}</div>
           <div class="user-details">
             <span class="user-name-title" routerLink="/student/profile" (click)="showProfileDropdown = false" style="cursor: pointer; text-decoration: none;">{{ getStudentFirstName() }} {{ getStudentLastName() }}</span>
-            <span class="user-email-subtitle">{{ currentUser?.email || 'I12345@etu.iscae.mr' }}</span>
+            <span class="user-email-subtitle">{{ currentUser?.email || '-' }}</span>
           </div>
         </div>
         <div class="dropdown-profile-body">
@@ -208,8 +204,8 @@
               <span class="mini-coeff">Coeff: {{ n.coefficient }}</span>
             </div>
             <div class="mini-card-body">
-              <span class="mini-note" [ngClass]="n.valeur_note >= 10 ? 'pass' : 'fail'">
-                {{ n.valeur_note !== null && n.valeur_note !== undefined ? n.valeur_note.toFixed(2) : '-' }}
+              <span class="mini-note" [ngClass]="n.moyenne >= 10 ? 'pass' : 'fail'">
+                {{ n.moyenne !== null && n.moyenne !== undefined ? n.moyenne.toFixed(2) : '-' }}
               </span>
               <span class="mini-slash">/ 20</span>
             </div>

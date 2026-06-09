@@ -1,0 +1,81 @@
+<aside class="sidebar" [class.closed]="!isSidebarOpen">
+  <div class="sidebar-top">
+    <div class="brand-section">
+      <div class="logo-wrapper">
+        <img src="logo_iscae.jpeg" alt="ISCAE Logo">
+      </div>
+      <h4 class="brand-logo">
+        ISCAE <span *ngIf="role === 'teacher'">PROF</span><span *ngIf="role === 'admin'">ADMIN</span><span *ngIf="role === 'student'">ÉTUDIANT</span>
+      </h4>
+      <p class="brand-subtitle">
+        <ng-container [ngSwitch]="role">
+          <span *ngSwitchCase="'teacher'">Saisie des Notes</span>
+          <span *ngSwitchCase="'admin'">Gestion des Notes</span>
+          <span *ngSwitchCase="'student'">Espace Étudiant</span>
+        </ng-container>
+      </p>
+    </div>
+
+    <nav class="menu-section" *ngIf="role === 'teacher'">
+      <div class="menu-title">Mes Classes & Matières</div>
+      <ng-container *ngIf="affectations && affectations.length > 0; else noAffectationsMenu">
+        <a *ngFor="let aff of affectations"
+           class="menu-link"
+           [class.active]="selectedAffectation?.classe_id === aff.classe_id && selectedAffectation?.matiere_id === aff.matiere_id"
+           href="javascript:void(0)"
+           (click)="selectAffectation.emit(aff)">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span class="text-truncate menu-link-text">
+            {{ aff.classe.nom_classe }} - {{ aff.matiere.nom_matiere }}
+          </span>
+        </a>
+      </ng-container>
+
+      <ng-template #noAffectationsMenu>
+        <div class="empty-menu-message">Aucune classe</div>
+      </ng-template>
+    </nav>
+
+    <nav class="menu-section" *ngIf="role === 'admin'">
+      <div class="menu-title">Tableau de Bord</div>
+      <a *ngFor="let item of adminMenuItems"
+         class="menu-link"
+         [class.active]="activeAdminTab === item.key"
+         href="#"
+         (click)="selectAdminTab.emit(item.key); $event.preventDefault();">
+        <i [class]="item.icon"></i>
+        <span class="menu-link-text">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <nav class="menu-section" *ngIf="role === 'student'">
+      <div class="menu-title">Mon Espace</div>
+      <a *ngFor="let item of studentMenuItems"
+         class="menu-link"
+         [routerLink]="item.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <i [class]="item.icon"></i>
+        <span class="menu-link-text">{{ item.label }}</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="user-profile-card">
+    <div class="avatar">{{ displayAvatarText }}</div>
+
+    <div class="user-info">
+      <span class="user-name">{{ displayProfileName }}</span>
+      <span class="user-role">{{ displayProfileRole }}</span>
+    </div>
+
+    <div class="user-actions">
+      <button *ngIf="showPasswordAction" (click)="openPasswordModal.emit()" class="action-btn" title="Modifier mot de passe">
+        <i class="fa-solid fa-key"></i>
+      </button>
+      <button (click)="logout.emit()" class="action-btn logout-btn" title="Se déconnecter">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</aside>

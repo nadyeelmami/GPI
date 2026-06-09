@@ -1,24 +1,25 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth.service';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-student-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, SidebarComponent],
   templateUrl: './student-layout.component.html',
   styleUrls: ['./student-layout.component.css']
 })
 export class StudentLayoutComponent implements OnInit {
 
-  isCollapsed: boolean = false;
+  isSidebarOpen: boolean = true;
   currentUser: any = null;
 
   @HostListener('window:toggle-sidebar', [])
   onToggleSidebar() {
-    this.toggleSidebar();
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   // Change Password Modal State
@@ -58,7 +59,7 @@ export class StudentLayoutComponent implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   getUserInitials(): string {
